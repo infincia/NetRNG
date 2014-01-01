@@ -1,0 +1,13 @@
+[Global]
+mode = server
+port = 8989
+debug = no
+
+[Server]
+sample_size_bytes = 2048
+listen_address = 0.0.0.0
+hwrng_device = /dev/hwrng
+max_clients = 2
+
+[Client]
+server_address = 192.168.1.2

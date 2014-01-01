@@ -1,0 +1,4 @@
+gsocketpool==0.0.1
+gevent==0.13.8
+greenlet==0.4.1
+gevent-subprocess==0.1.1
