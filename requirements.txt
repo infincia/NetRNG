@@ -1,7 +1,4 @@
-argparse==1.2.1
-distribute==0.7.3
 gevent==1.0
 gevent-subprocess==0.1.1
 greenlet==0.4.1
 gsocketpool==0.1.1
-wsgiref==0.1.2
