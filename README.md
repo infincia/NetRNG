@@ -1,32 +1,71 @@
 #NetRNG
 
-Allows a dedicated machine with an HWRNG to provide random data to other 
-machines on the network. Code should be simple and easy to understand, and
-should also be portable beyond Linux to FreeBSD and other systems
+NetRNG allows a dedicated machine with a hardware based random number generator
+to provide random data to other machines on the network that don't have an RNG of
+their own, similar to entropy broker. It allows those machines to benefit from a
+high speed, (hopefully) high quality entropy source.
 
-##Purpose
+##How it works
 
-Devices like the RaspberryPi, PC Engines ALIX, some server hardware and the occasional
-desktop sometimes have a hardware based RNG built-in or attached via PCI card.
+As a complete system, NetRNG links ``/dev/hwrng`` on one machine, to ``/dev/random``
+on many others, carefully ensuring that each machine receives unique entropy samples,
+while allowing the entropy to be validated for quality and ensuring that each
+machine can receive a specific amount of entropy per second, preventing starvation.
 
-###Security notes
+But NetRNG itself actually does one job and only one job: it moves random data 
+around on the local network. Everything else is left to other programs suited for
+each task.
 
-NetRNG does one job, moves random data around on the local network. It doesn't attempt
-to validate the random data according to FIPS or any other standard, rngd or 
-other tools can already do that for you if you deem it useful. 
+It is essentially a persistent pipeline from one machine to many others, with
+some minor additional restrictions on how the pipeline functions to make it
+suitable for the task.
 
-NetRNG does attempt to split up the random data it receives from the HWRNG so that 
-each client receives a unique stream with no duplicated samples going to multiple 
-clients.
+
+###Server
+
+The NetRNG server reads from ``/dev/hwrng`` (configurable), dividing the stream 
+to non-repeating, non-overlapping samples of a size defined in the configuration
+file, then sends each one to clients on the local network.
+
+The maximum number of clients that will be accepted can be configured on the server,
+this allows you to prevent a slow HWRNG from being spread too thin among too many
+clients. 
+
+At some point I want to add dynamic load management instead of a client limit.
+So for example, you would configure the server to guarantee 10KB/s of random data
+to each client, and the server would decide how many clients it could guarantee
+that rate for based on the speed of the HWRNG being used. You can do this now 
+by testing it yourself, but I would like to automate it.
+
+
+####Client
+
+The client starts ``rngd`` as a subprocess, then connects to the server and starts
+receiving entropy samples from it, forwarding each one to ``rngd`` for processing.
+
+Then, ``rngd` validates the quality of the entropy before submitting samples to 
+the Linux kernel for other programs to use via ``/dev/random``.
+
+
+###Common devices to use as the RNG server
+
+* RaspberryPi
+* Beaglebone
+* PC Engines ALIX
+* Various server mainboards
+* Entropy Key (installed in any Linux machine)
 
 
 ###Setup
 
-There is a server, netrng-server, and a client, netrngd. The server runs on the 
-machine with the HWRNG, the client runs on any machine you want to use it on. 
+There is very little actual setup required, and all code is in ``netrng.py``.
 
-The client attempts to setup and maintain a local fifo so that other programs 
-like rng-tools can read from it and submit the data in to the Linux kernel.
+The configuration file determines whether the service will run in client or server
+mode, review it to ensure the client and server settings are correct for your
+network.
+
+No paths in the code are hardcoded, so feel free to put the code wherever you
+like, but make sure to change the init/upstart script to match.
 
 
 ####Clone the repo
@@ -60,20 +99,16 @@ can support faster rates, change sample_size_bytes to something larger. I want
 to automate this soon by measuring the HWRNG performance at runtime and adjust 
 the sample setting to divide it by the number of connected clients so
 there is always an even split.
- 
-###Using NetRNG
 
-The general idea is simple, as long as you have a working HWRNG things should
-just basically work
 
-####Run directly for testing
+###Run directly for testing
 
     source /opt/NetRNG/env/bin/activate
     cd /opt/NetRNG
     python netrng.py
 
 
-####Long term use
+###Long term use
 
 The Upstart script included in the repo is simple, just copy it to the system 
 and Upstart will keep NetRNG running for you
