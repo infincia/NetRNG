@@ -2,3 +2,4 @@ gevent==1.0
 gevent-subprocess==0.1.1
 greenlet==0.4.1
 gsocketpool==0.1.1
+msgpack-python==0.4.0

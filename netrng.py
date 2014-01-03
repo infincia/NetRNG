@@ -13,8 +13,7 @@ import ConfigParser
 import socket
 import binascii
 import errno
-import json
-import subprocess
+import msgpack
 
 '''
     Config
@@ -93,7 +92,7 @@ class NetRNGServer(object):
                 log.debug('NetRNG Server: got command: %s', command)
                 if command == 'get:config':
                     log.debug('NetRNG Server: sending configuration to %s', address)
-                    config = json.dumps({'max_clients': self.max_clients, 'sample_size_bytes': self.sample_size_bytes})
+                    config = msgpack.dumps({'max_clients': self.max_clients, 'sample_size_bytes': self.sample_size_bytes})
                     log.debug('NetRNG Server: config: %s', config)
                     fileobj.write(config + '\r\n')
                     fileobj.flush()
@@ -172,6 +171,7 @@ class NetRNGClient(object):
             starting/stopping/configuring it at the right times
 
         '''
+        import subprocess
         log.info('NetRNG client: initializing')
         sock = None
         rngd = None
@@ -189,7 +189,7 @@ class NetRNGClient(object):
                     fileobj.flush()
                     server_config_string = fileobj.readline().rstrip('\r\n')
                     log.debug('NetRNG client: config received: %s', server_config_string)
-                    server_config = json.loads(server_config_string)
+                    server_config = msgpack.loads(server_config_string)
                     self.server_max_clients = server_config['max_clients']
                     self.sample_size_bytes = server_config['sample_size_bytes']
                     self.configured = True
