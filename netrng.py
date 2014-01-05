@@ -257,6 +257,7 @@ class NetRNGClient(object):
                 sys.exit(0)
             except Exception, e:
                 log.exception('NetRNG client: exception %s', e)
+                sock.close()
                 sys.exit(0)
 
 '''
