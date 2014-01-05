@@ -141,11 +141,11 @@ class NetRNGServer(object):
             new connection. Blocks caller
 
         '''
-        pool = Pool(self.max_clients)
-        server = StreamServer((self.listen_address, self.port), self.serve, spawn=pool)
+        self.pool = Pool(self.max_clients)
+        self.server = StreamServer((self.listen_address, self.port), self.serve, spawn=self.pool)
         log.debug('NetRNG server: serving up to %d connections on ("%s", %d)', self.max_clients, self.listen_address, self.port)
         try:
-            server.serve_forever()
+            self.server.serve_forever()
         except KeyboardInterrupt, e:
             log.debug('NetRNG server: exiting due to keyboard interrupt')
             sys.exit(0)
