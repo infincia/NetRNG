@@ -58,15 +58,17 @@ class NetRNGServer(object):
     '''
     def __init__(self):
 
+        # TCP port to listen on
         self.port = netrng_config.getint('Global', 'port')
 
         # How much random data to request from the device for each client push
         self.sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
 
-        # listen address used by the server
+        # Listen address used by the server
         self.listen_address = netrng_config.get('Server', 'listen_address')
 
-        # which device to use on server side
+        # Source device to use for random data, should be something fast and
+        # high quality, DON'T set this to /dev/random
         self.hwrng_device = netrng_config.get('Server', 'hwrng_device')
 
         # Maximum number of clients to accept, this prevents your HWRNG from being
@@ -76,7 +78,10 @@ class NetRNGServer(object):
         # be able to serve 1 client slowly
         self.max_clients = netrng_config.getint('Server', 'max_clients')
 
+        # open the hwrng for reading later during client requests
         self.hwrng = open(self.hwrng_device, 'r')
+        
+        # lock to prevent multiple clients from getting the same random samples
         self.lock = RLock()
 
     def serve(self, sock, address):
@@ -86,24 +91,24 @@ class NetRNGServer(object):
             samples
     
         '''
-        log.info('NetRNG server: client connected %s', address)
+        log.debug('NetRNG server: client connected %s', address)
         while True:
             try:
                 requestmsg = ""
                 while True:
-                    log.debug('NetRNG server: receive cycle: %s' % requestmsg)
+                    log.debug('NetRNG server: receive cycle: %s', requestmsg)
                     if SOCKET_DELIMITER in requestmsg:
                         requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
                         break
                     data = sock.recv(1024)
                     requestmsg = requestmsg + data
-                log.debug('NetRNG server: receive cycle done: %s' % requestmsg)
+                log.debug('NetRNG server: receive cycle done: %s', requestmsg)
                 request = msgpack.unpackb(requestmsg)
-                log.debug('NetRNG server: request %s' % request)
+                log.debug('NetRNG server: request %s', request)
                 if request['get'] == 'config':
                     log.debug('NetRNG server: sending configuration to %s', address)
                     response = {'push': 'config', 'config': {'max_clients': self.max_clients, 'sample_size_bytes': self.sample_size_bytes}}
-                    log.debug('NetRNG server: sending response %s' % response)
+                    log.debug('NetRNG server: sending response %s', response)
                     responsemsg = msgpack.packb(response)
                     sock.send(responsemsg + SOCKET_DELIMITER)
                     log.debug('NetRNG server: response sent')
@@ -119,9 +124,9 @@ class NetRNGServer(object):
             except socket.error, e:
                 if isinstance(e.args, tuple):
                     if e[0] == errno.EPIPE:
-                        log.info('NetRNG server: client disconnected %s', address)
+                        log.debug('NetRNG server: client disconnected %s', address)
                 else:
-                    log.error('NetRNG server: ', e)
+                    log.exception('NetRNG server: socket error %s', e)
                 sock.close()
                 break
             except Exception, e:
@@ -138,11 +143,11 @@ class NetRNGServer(object):
         '''
         pool = Pool(self.max_clients)
         server = StreamServer((self.listen_address, self.port), self.serve, spawn=pool)
-        log.info('NetRNG server: serving up to %d connections on ("%s", %d)' % (self.max_clients, self.listen_address, self.port))
+        log.debug('NetRNG server: serving up to %d connections on ("%s", %d)', (self.max_clients, self.listen_address, self.port))
         try:
             server.serve_forever()
         except KeyboardInterrupt, e:
-            log.warn('NetRNG server: exiting due to keyboard interrupt')
+            log.debug('NetRNG server: exiting due to keyboard interrupt')
             sys.exit(0)
 
 class NetRNGClient(object):
@@ -151,6 +156,8 @@ class NetRNGClient(object):
     
     '''
     def __init__(self):
+    
+        # TCP port to connect to on the server
         self.port = netrng_config.getint('Global', 'port')
 
         # Address of the server to connect to
@@ -162,7 +169,7 @@ class NetRNGClient(object):
         # Retrieved from server at runtime
         self.server_max_clients = 0
 
-        # configuration state
+        # Configuration state
         self.configured = False
 
         # Connection state
@@ -179,7 +186,7 @@ class NetRNGClient(object):
             starting/stopping/configuring it at the right times
 
         '''
-        log.info('NetRNG client: initializing')
+        log.debug('NetRNG client: initializing')
         sock = None
         rngd = None
         while True:
@@ -187,7 +194,7 @@ class NetRNGClient(object):
                 if not self.connected:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     sock.connect((self.server_address, self.port))
-                    log.info('NetRNG client: connected to ("%s", %d)' % (self.server_address, self.port))
+                    log.debug('NetRNG client: connected to ("%s", %d)', (self.server_address, self.port))
                     self.connected = True
                 if not self.configured:
                     log.debug('NetRNG client: requesting configuration from server')
@@ -197,13 +204,13 @@ class NetRNGClient(object):
                     sock.send(requestmsg + SOCKET_DELIMITER)
                     responsemsg = ""
                     while True:
-                        log.debug('NetRNG client: receive cycle: %s' % responsemsg)
+                        log.debug('NetRNG client: receive cycle: %s', responsemsg)
                         if SOCKET_DELIMITER in responsemsg:
                             responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                             break
                         data = sock.recv(1024)
                         responsemsg = responsemsg + data
-                    log.debug('NetRNG client: receive cycle done: %s' % responsemsg)
+                    log.debug('NetRNG client: receive cycle done: %s', responsemsg)
                     response = msgpack.unpackb(responsemsg)
                     log.debug('NetRNG client: response %s', response)
                     if response['push'] == 'config':
@@ -222,16 +229,16 @@ class NetRNGClient(object):
                 request = {'get': 'sample'}
                 requestmsg = msgpack.packb(request)
                 sock.send(requestmsg + SOCKET_DELIMITER)
-                log.debug('NetRNG server: request sent %s' % request)
+                log.debug('NetRNG server: request sent %s', request)
                 responsemsg = ""
                 while True:
-                    log.debug('NetRNG client: receive cycle: %s' % responsemsg)
+                    log.debug('NetRNG client: receive cycle: %s', responsemsg)
                     if SOCKET_DELIMITER in responsemsg:
                         responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                         break
                     data = sock.recv(1024)
                     responsemsg = responsemsg + data
-                log.debug('NetRNG client: receive cycle done: %s' % responsemsg)
+                log.debug('NetRNG client: receive cycle done: %s', responsemsg)
                 response = msgpack.unpackb(responsemsg)
                 log.debug('NetRNG client: response %s', response)
                 if response['push'] == 'sample':
@@ -242,10 +249,10 @@ class NetRNGClient(object):
             except socket.error, msg:
                 sock.close()
                 self.connected = False
-                log.warn('NetRNG client: server unavailable, reconnecting in 10 seconds')
+                log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
                 gevent.sleep(10)
             except KeyboardInterrupt, e:
-                log.warn('NetRNG client: exiting due to keyboard interrupt')
+                log.debug('NetRNG client: exiting due to keyboard interrupt')
                 sock.close()
                 sys.exit(0)
             except Exception, e:
