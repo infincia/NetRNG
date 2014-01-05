@@ -143,7 +143,7 @@ class NetRNGServer(object):
         '''
         pool = Pool(self.max_clients)
         server = StreamServer((self.listen_address, self.port), self.serve, spawn=pool)
-        log.debug('NetRNG server: serving up to %d connections on ("%s", %d)', (self.max_clients, self.listen_address, self.port))
+        log.debug('NetRNG server: serving up to %d connections on ("%s", %d)', self.max_clients, self.listen_address, self.port)
         try:
             server.serve_forever()
         except KeyboardInterrupt, e:
@@ -194,7 +194,7 @@ class NetRNGClient(object):
                 if not self.connected:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     sock.connect((self.server_address, self.port))
-                    log.debug('NetRNG client: connected to ("%s", %d)', (self.server_address, self.port))
+                    log.debug('NetRNG client: connected to ("%s", %d)', self.server_address, self.port)
                     self.connected = True
                 if not self.configured:
                     log.debug('NetRNG client: requesting configuration from server')
