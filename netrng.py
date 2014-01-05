@@ -213,7 +213,7 @@ class NetRNGClient(object):
                         self.sample_size_bytes = server_config['sample_size_bytes']
                         self.configured = True
                         rngd = gevent.subprocess.Popen(['rngd','-f','-r','/dev/stdin'],
-                                            stdin=subprocess.PIPE,
+                                            stdin=gevent.subprocess.PIPE,
                                             stdout=open(os.devnull, 'w'),
                                             stderr=open(os.devnull, 'w'),
                                             close_fds=True)
