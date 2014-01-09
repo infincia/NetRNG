@@ -121,7 +121,7 @@ class NetRNGServer(object):
                     log.debug('NetRNG server: sending response')
                     responsemsg = msgpack.packb(response)
                     sock.send(responsemsg + SOCKET_DELIMITER)
-            except socket.error, e:
+            except socket.error as e:
                 if isinstance(e.args, tuple):
                     if e[0] == errno.EPIPE:
                         log.debug('NetRNG server: client disconnected %s', address)
@@ -129,7 +129,7 @@ class NetRNGServer(object):
                     log.exception('NetRNG server: socket error %s', e)
                 sock.close()
                 break
-            except Exception, e:
+            except Exception as e:
                 log.exception('NetRNG server: %s', e)
                 sock.close()
                 break
@@ -146,7 +146,7 @@ class NetRNGServer(object):
         log.debug('NetRNG server: serving up to %d connections on ("%s", %d)', self.max_clients, self.listen_address, self.port)
         try:
             self.server.serve_forever()
-        except KeyboardInterrupt, e:
+        except KeyboardInterrupt as e:
             log.debug('NetRNG server: exiting due to keyboard interrupt')
             sys.exit(0)
 
@@ -251,11 +251,11 @@ class NetRNGClient(object):
                 self.connected = False
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
                 gevent.sleep(10)
-            except KeyboardInterrupt, e:
+            except KeyboardInterrupt as e:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
                 sock.close()
                 sys.exit(0)
-            except Exception, e:
+            except Exception as e:
                 log.exception('NetRNG client: exception %s', e)
                 sock.close()
                 sys.exit(0)
