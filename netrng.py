@@ -251,7 +251,7 @@ class NetRNGClient(object):
                 request = {'get': 'sample'}
                 requestmsg = msgpack.packb(request)
                 sock.sendall(requestmsg + SOCKET_DELIMITER)
-                log.debug('NetRNG server: request sent %s', request)
+                log.debug('NetRNG client: request sent %s', request)
                 responsemsg = ""
                 while True:
                     data = sock.recv(1024)
