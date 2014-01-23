@@ -112,12 +112,12 @@ class NetRNGServer(object):
             try:
                 requestmsg = ""
                 while True:
+                    data = sock.recv(1024)
+                    requestmsg = requestmsg + data
                     log.debug('NetRNG server: receive cycle: %s', requestmsg)
                     if SOCKET_DELIMITER in requestmsg:
                         requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
                         break
-                    data = sock.recv(1024)
-                    requestmsg = requestmsg + data
                 log.debug('NetRNG server: receive cycle done: %s', requestmsg)
                 request = msgpack.unpackb(requestmsg)
                 log.debug('NetRNG server: request %s', request)
@@ -126,7 +126,7 @@ class NetRNGServer(object):
                     response = {'push': 'config', 'config': {'max_clients': self.max_clients, 'sample_size_bytes': self.sample_size_bytes}}
                     log.debug('NetRNG server: sending response %s', response)
                     responsemsg = msgpack.packb(response)
-                    sock.send(responsemsg + SOCKET_DELIMITER)
+                    sock.sendall(responsemsg + SOCKET_DELIMITER)
                     log.debug('NetRNG server: response sent')
                 elif request['get'] == 'sample':
                     with self.lock:
@@ -136,7 +136,7 @@ class NetRNGServer(object):
                     response = {'push': 'sample', 'sample': sample}
                     log.debug('NetRNG server: sending response')
                     responsemsg = msgpack.packb(response)
-                    sock.send(responsemsg + SOCKET_DELIMITER)
+                    sock.sendall(responsemsg + SOCKET_DELIMITER)
             except socket.error as e:
                 if isinstance(e.args, tuple):
                     if e[0] == errno.EPIPE:
@@ -224,15 +224,15 @@ class NetRNGClient(object):
                     request = {'get': 'config'}
                     log.debug('NetRNG client: request %s', request)
                     requestmsg = msgpack.packb(request)
-                    sock.send(requestmsg + SOCKET_DELIMITER)
+                    sock.sendall(requestmsg + SOCKET_DELIMITER)
                     responsemsg = ""
                     while True:
+                        data = sock.recv(1024)
+                        responsemsg = responsemsg + data
                         log.debug('NetRNG client: receive cycle: %s', responsemsg)
                         if SOCKET_DELIMITER in responsemsg:
                             responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                             break
-                        data = sock.recv(1024)
-                        responsemsg = responsemsg + data
                     log.debug('NetRNG client: receive cycle done: %s', responsemsg)
                     response = msgpack.unpackb(responsemsg)
                     log.debug('NetRNG client: response %s', response)
@@ -251,16 +251,16 @@ class NetRNGClient(object):
                 log.debug('NetRNG client: requesting sample')
                 request = {'get': 'sample'}
                 requestmsg = msgpack.packb(request)
-                sock.send(requestmsg + SOCKET_DELIMITER)
+                sock.sendall(requestmsg + SOCKET_DELIMITER)
                 log.debug('NetRNG server: request sent %s', request)
                 responsemsg = ""
                 while True:
+                    data = sock.recv(1024)
+                    responsemsg = responsemsg + data
                     log.debug('NetRNG client: receive cycle: %s', responsemsg)
                     if SOCKET_DELIMITER in responsemsg:
                         responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                         break
-                    data = sock.recv(1024)
-                    responsemsg = responsemsg + data
                 log.debug('NetRNG client: receive cycle done: %s', responsemsg)
                 response = msgpack.unpackb(responsemsg)
                 log.debug('NetRNG client: response %s', response)
