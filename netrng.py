@@ -277,6 +277,7 @@ class NetRNGClient(object):
                 sleep(10)
             except KeyboardInterrupt as e:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
+                break
             except Exception as e:
                 log.exception('NetRNG client: exception %s', e)
             finally:
