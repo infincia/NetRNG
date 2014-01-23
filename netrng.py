@@ -260,9 +260,10 @@ class NetRNGClient(object):
                 log.debug('NetRNG client: request sent %s', request)
                 responsemsg = ""
                 while True:
+                    log.debug('NetRNG client: receive cycle start')
                     data = self.sock.recv(1024)
                     responsemsg = responsemsg + data
-                    log.debug('NetRNG client: receive cycle')
+                    log.debug('NetRNG client: receive cycle end')
                     if SOCKET_DELIMITER in responsemsg:
                         responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                         break
