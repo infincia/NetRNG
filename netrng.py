@@ -199,7 +199,13 @@ class NetRNGClient(object):
         # Connection state
         self.connected = False
 
+        # rngd subprocess
+        self.rngd = None
 
+        # client socket for connecting to server
+        self.sock = None
+    
+    
     def stream(self):
         '''
             Opens a connection to the server, configures the sample size to
@@ -211,13 +217,11 @@ class NetRNGClient(object):
 
         '''
         log.debug('NetRNG client: initializing')
-        sock = None
-        rngd = None
         while True:
             try:
                 if not self.connected:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.connect((self.server_address, self.port))
+                    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.sock.connect((self.server_address, self.port))
                     log.debug('NetRNG client: connected to ("%s", %d)', self.server_address, self.port)
                     self.connected = True
                 if not self.configured:
@@ -225,10 +229,10 @@ class NetRNGClient(object):
                     request = {'get': 'config'}
                     log.debug('NetRNG client: request %s', request)
                     requestmsg = msgpack.packb(request)
-                    sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
                     responsemsg = ""
                     while True:
-                        data = sock.recv(1024)
+                        data = self.sock.recv(1024)
                         responsemsg = responsemsg + data
                         log.debug('NetRNG client: receive cycle: %s', responsemsg)
                         if SOCKET_DELIMITER in responsemsg:
@@ -251,11 +255,11 @@ class NetRNGClient(object):
                 log.debug('NetRNG client: requesting sample')
                 request = {'get': 'sample'}
                 requestmsg = msgpack.packb(request)
-                sock.sendall(requestmsg + SOCKET_DELIMITER)
+                self.sock.sendall(requestmsg + SOCKET_DELIMITER)
                 log.debug('NetRNG client: request sent %s', request)
                 responsemsg = ""
                 while True:
-                    data = sock.recv(1024)
+                    data = self.sock.recv(1024)
                     responsemsg = responsemsg + data
                     log.debug('NetRNG client: receive cycle')
                     if SOCKET_DELIMITER in responsemsg:
@@ -277,7 +281,7 @@ class NetRNGClient(object):
                 log.exception('NetRNG client: exception %s', e)
             finally:
                 self.connected = False
-                sock.close()
+                self.sock.close()
         sys.exit(0)
 
 
