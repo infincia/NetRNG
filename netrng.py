@@ -233,9 +233,8 @@ class NetRNGClient(object):
                         if SOCKET_DELIMITER in responsemsg:
                             responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                             break
-                    log.debug('NetRNG client: receive cycle done: %s', responsemsg)
+                    log.debug('NetRNG client: receive cycle done')
                     response = msgpack.unpackb(responsemsg)
-                    log.debug('NetRNG client: response %s', response)
                     if response['push'] == 'config':
                         log.debug('NetRNG client: config received %s', response)
                         server_config = response['config']
@@ -257,13 +256,12 @@ class NetRNGClient(object):
                 while True:
                     data = sock.recv(1024)
                     responsemsg = responsemsg + data
-                    log.debug('NetRNG client: receive cycle: %s', responsemsg)
+                    log.debug('NetRNG client: receive cycle')
                     if SOCKET_DELIMITER in responsemsg:
                         responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                         break
-                log.debug('NetRNG client: receive cycle done: %s', responsemsg)
+                log.debug('NetRNG client: receive cycle done')
                 response = msgpack.unpackb(responsemsg)
-                log.debug('NetRNG client: response %s', response)
                 if response['push'] == 'sample':
                     sample = response['sample']
                     log.debug('NetRNG client: received %d byte sample', len(sample))
