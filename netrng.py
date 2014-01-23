@@ -18,6 +18,9 @@ from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent.coros import RLock
 
+
+
+
 '''
     Config
 
@@ -35,6 +38,9 @@ DEBUG = netrng_config.getboolean('Global', 'debug')
 # delimiter for end of socket messages
 SOCKET_DELIMITER = '--NETRNG-SOCKET-DELIMITER'
 
+
+
+
 ''' 
     Logging setup
     
@@ -51,11 +57,17 @@ log.addHandler(mainHandler)
 
 
 
+
+
 class NetRNGServer(object):
     '''
         NetRNG server
     
     '''
+    
+    
+    
+    
     def __init__(self):
 
         # TCP port to listen on
@@ -83,6 +95,10 @@ class NetRNGServer(object):
         
         # lock to prevent multiple clients from getting the same random samples
         self.lock = RLock()
+
+
+
+
 
     def serve(self, sock, address):
         '''
@@ -138,7 +154,7 @@ class NetRNGServer(object):
     def start(self):
         '''
             Server starts listening on a TCP socket and spawns a greenlet for each
-            new connection. Blocks caller
+            new connection. Blocks caller.
 
         '''
         self.pool = Pool(self.max_clients)
@@ -149,6 +165,13 @@ class NetRNGServer(object):
         except KeyboardInterrupt as e:
             log.debug('NetRNG server: exiting due to keyboard interrupt')
             sys.exit(0)
+
+
+
+
+
+
+
 
 class NetRNGClient(object):
     '''
