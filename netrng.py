@@ -109,18 +109,19 @@ class NetRNGServer(object):
     
         '''
         log.debug('NetRNG server: client connected %s', address)
+        requestmsg = ""
         while True:
             try:
-                requestmsg = ""
-                while True:
-                    data = sock.recv(1024)
-                    requestmsg = requestmsg + data
-                    log.debug('NetRNG server: receive cycle: %s', requestmsg)
-                    if SOCKET_DELIMITER in requestmsg:
-                        requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
-                        break
+                data = sock.recv(1024)
+                requestmsg = requestmsg + data
+                log.debug('NetRNG server: receive cycle: %s', requestmsg)
+                if not SOCKET_DELIMITER in requestmsg:
+                    continue
+                requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
                 log.debug('NetRNG server: receive cycle done: %s', requestmsg)
                 request = msgpack.unpackb(requestmsg)
+                # reset buffer for next loop
+                requestmsg = ""
                 log.debug('NetRNG server: request %s', request)
                 if request['get'] == 'config':
                     log.debug('NetRNG server: sending configuration to %s', address)
