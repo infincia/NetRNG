@@ -268,18 +268,18 @@ class NetRNGClient(object):
                     rngd.stdin.write(sample)
                     rngd.stdin.flush()
             except socket.error, msg:
-                sock.close()
-                self.connected = False
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
                 gevent.sleep(10)
             except KeyboardInterrupt as e:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
-                sock.close()
-                sys.exit(0)
+                break
             except Exception as e:
                 log.exception('NetRNG client: exception %s', e)
+            finally:
+                self.connected = False
                 sock.close()
-                sys.exit(0)
+        sys.exit(0)
+
 
 '''
     Select correct mode based on configuration and start
