@@ -8,7 +8,7 @@ import ConfigParser
 import msgpack
 import socket
 import errno
-
+import time
 
 # pip packages
 
@@ -275,7 +275,7 @@ class NetRNGClient(object):
                     rngd.stdin.flush()
             except socket.error, msg:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
-                sleep(10)
+                time.sleep(10)
             except KeyboardInterrupt as e:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
                 break
