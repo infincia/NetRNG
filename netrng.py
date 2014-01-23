@@ -1,7 +1,3 @@
-# pip packages
-
-from gevent import monkey; monkey.patch_all()
-
 # standard libraries
 
 import time
@@ -12,6 +8,11 @@ import ConfigParser
 import msgpack
 import socket
 import errno
+
+
+# pip packages
+
+
 import gevent
 import gevent.subprocess
 from gevent.server import StreamServer
@@ -269,10 +270,9 @@ class NetRNGClient(object):
                     rngd.stdin.flush()
             except socket.error, msg:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
-                gevent.sleep(10)
+                sleep(10)
             except KeyboardInterrupt as e:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
-                break
             except Exception as e:
                 log.exception('NetRNG client: exception %s', e)
             finally:
