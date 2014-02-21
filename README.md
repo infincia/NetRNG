@@ -49,7 +49,7 @@ that rate for based on the speed of the HWRNG being used. You can do this now
 by testing it yourself, but I would like to automate it.
 
 
-####Client
+###Client
 
 The client starts ``rngd`` as a subprocess, then connects to the server and starts
 receiving entropy samples from it, forwarding each one to ``rngd`` for processing.
