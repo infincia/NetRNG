@@ -1,9 +1,20 @@
+#NOTE: The master branch of this code is still unstable, but the zeromq branch seems to work fairly well, it's what I use at home right now. The only thing it lacks is the ability to limit connected clients automatically.
+
 #NetRNG
 
 NetRNG allows a dedicated machine with a hardware based random number generator
 to provide random data to other machines on the network that don't have an RNG of
 their own, similar to entropy broker. It allows those machines to benefit from a
 high speed, (hopefully) high quality entropy source.
+
+##Why it exists
+
+EntropyBroker is the closest similar project I know of, but it didn't build when I
+tried to use it and the code seems quite large and complicated for a task that,
+conceptually, is very simple.
+
+So I wrote NetRNG. It's incredibly simple code, easy to read and understand, easy
+to deploy, and it works perfectly in all my testing.
 
 ##How it works
 
@@ -12,19 +23,19 @@ on many others, carefully ensuring that each machine receives unique entropy sam
 while allowing the entropy to be validated for quality and ensuring that each
 machine can receive a specific amount of entropy per second, preventing starvation.
 
-But NetRNG itself actually does one job and only one job: it moves random data 
-around on the local network. Everything else is left to other programs suited for
-each task.
-
 It is essentially a persistent pipeline from one machine to many others, with
 some minor additional restrictions on how the pipeline functions to make it
 suitable for the task.
 
+However, netrng.py itself does one job and only one job: it moves random data 
+around on the local network. Other tasks like validating the samples and doing
+something with them are left to other programs that are good at them.
+
 
 ###Server
 
-The NetRNG server reads from ``/dev/hwrng`` (configurable), dividing the stream 
-to non-repeating, non-overlapping samples of a size defined in the configuration
+The NetRNG server reads from ``/dev/hwrng`` (configurable), dividing up the stream 
+in to non-repeating, non-overlapping samples of a size defined in the configuration
 file, then sends each one to clients on the local network.
 
 The maximum number of clients that will be accepted can be configured on the server,
