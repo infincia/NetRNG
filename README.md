@@ -54,7 +54,7 @@ by testing it yourself, but I would like to automate it.
 The client starts ``rngd`` as a subprocess, then connects to the server and starts
 receiving entropy samples from it, forwarding each one to ``rngd`` for processing.
 
-Then, ``rngd` validates the quality of the entropy before submitting samples to 
+Then, ``rngd`` validates the quality of the entropy before submitting samples to 
 the Linux kernel for other programs to use via ``/dev/random``.
 
 
