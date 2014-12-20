@@ -9,6 +9,7 @@ import msgpack
 import socket
 import errno
 import time
+import signal
 
 # pip packages
 
