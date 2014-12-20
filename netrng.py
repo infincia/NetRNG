@@ -112,17 +112,16 @@ class NetRNGServer(object):
         requestmsg = ""
         while True:
             try:
+                log.debug('NetRNG server: receive cycle start')
                 data = sock.recv(1024)
                 requestmsg = requestmsg + data
                 log.debug('NetRNG server: receive cycle: %s', requestmsg)
                 if not SOCKET_DELIMITER in requestmsg:
                     continue
                 requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
-                log.debug('NetRNG server: receive cycle done: %s', requestmsg)
                 request = msgpack.unpackb(requestmsg)
                 # reset buffer for next loop
                 requestmsg = ""
-                log.debug('NetRNG server: request %s', request)
                 if request['get'] == 'config':
                     log.debug('NetRNG server: sending configuration to %s', address)
                     response = {'push': 'config', 'config': {'max_clients': self.max_clients, 'sample_size_bytes': self.sample_size_bytes}}
@@ -131,6 +130,8 @@ class NetRNGServer(object):
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
                     log.debug('NetRNG server: response sent')
                 elif request['get'] == 'sample':
+                log.debug('NetRNG server: receive cycle done')
+                log.debug('NetRNG server: request received %s', request)
                     with self.lock:
                         log.debug('NetRNG server: lock acquired %s', self.lock)
                         sample = self.hwrng.read(self.sample_size_bytes)
