@@ -229,10 +229,12 @@ class NetRNGClient(object):
                     data = self.sock.recv(1024)
                     responsemsg = responsemsg + data
                     if SOCKET_DELIMITER in responsemsg:
-                        responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                         break
-                log.debug('NetRNG client: receive cycle done')
+                responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                 response = msgpack.unpackb(responsemsg)
+                log.debug('NetRNG client: receive cycle done')
+
+
                 if response['push'] == 'sample':
                     sample = response['sample']
                     log.debug('NetRNG client: received %d byte sample', len(sample))
