@@ -145,6 +145,25 @@ class NetRNGServer(object):
                 sock.close()
                 break
 
+    def calibrate(self):
+        '''
+            Naive implementation of auto-calibration for entropy source, should
+            check how much entropy can be received in a given number of seconds
+            and use that information to decide how much entropy can be distributed
+            per second. With that information, it should be possible to decide
+            how many clients can be promised `sample_size_bytes` per second
+
+        '''
+        log.debug('NetRNG server: starting entropy source performance calibration')
+        calibration_period = 15 # seconds
+        received_entropy = ""
+        stop_time = time.time() + calibration_period
+        while time.time() < stop_time:
+            received_entropy += self.hwrng.read(self.sample_size_bytes)
+        received_entropy_size = len(received_entropy)
+        received_entropy_per_second = received_entropy_size / calibration_period
+        log.debug('NetRNG server: completed entropy source performance calibration')
+        log.debug('NetRNG server: entropy source can provide %d bytes per second')
 
     def start(self):
         '''
