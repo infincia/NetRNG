@@ -110,8 +110,8 @@ class NetRNGServer(object):
         '''
         log.debug('NetRNG server: client connected %s', address)
         requestmsg = ""
-        while True:
-            try:
+        try:
+            while True:
                 log.debug('NetRNG server: receive cycle start')
                 data = sock.recv(1024)
                 requestmsg = requestmsg + data
@@ -132,18 +132,17 @@ class NetRNGServer(object):
                     log.debug('NetRNG server: sending response')
                     responsemsg = msgpack.packb({'push': 'sample', 'sample': sample})
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
-            except socket.error as e:
-                if isinstance(e.args, tuple):
-                    if e[0] == errno.EPIPE:
-                        log.debug('NetRNG server: client disconnected %s', address)
-                else:
-                    log.exception('NetRNG server: socket error %s', e)
-                sock.close()
-                break
-            except Exception as e:
-                log.exception('NetRNG server: %s', e)
-                sock.close()
-                break
+        except socket.error as e:
+            if isinstance(e.args, tuple):
+                if e[0] == errno.EPIPE:
+                    log.debug('NetRNG server: client disconnected %s', address)
+            else:
+                log.exception('NetRNG server: socket error %s', e)
+        except Exception as e:
+            log.exception('NetRNG server: %s', e)
+        finally:
+            sock.close()
+
 
     def calibrate(self):
         '''
