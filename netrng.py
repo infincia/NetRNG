@@ -129,9 +129,8 @@ class NetRNGServer(object):
                         log.debug('NetRNG server: lock acquired %s', self.lock)
                         sample = self.hwrng.read(self.sample_size_bytes)
                     log.debug('NetRNG server: lock release')
-                    response = {'push': 'sample', 'sample': sample}
                     log.debug('NetRNG server: sending response')
-                    responsemsg = msgpack.packb(response)
+                    responsemsg = msgpack.packb({'push': 'sample', 'sample': sample})
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
             except socket.error as e:
                 if isinstance(e.args, tuple):
@@ -218,8 +217,7 @@ class NetRNGClient(object):
 
                 # request a new sample
                 log.debug('NetRNG client: requesting sample')
-                request = {'get': 'sample'}
-                requestmsg = msgpack.packb(request)
+                requestmsg = msgpack.packb({'get': 'sample'})
                 self.sock.sendall(requestmsg + SOCKET_DELIMITER)
                 log.debug('NetRNG client: request sent %s', request)
                 responsemsg = ""
