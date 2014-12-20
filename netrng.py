@@ -220,12 +220,14 @@ class NetRNGClient(object):
                 requestmsg = msgpack.packb({'get': 'sample'})
                 self.sock.sendall(requestmsg + SOCKET_DELIMITER)
                 log.debug('NetRNG client: request sent %s', request)
+
+
+                # wait for response
+                log.debug('NetRNG client: receive cycle start')
                 responsemsg = ""
                 while True:
-                    log.debug('NetRNG client: receive cycle start')
                     data = self.sock.recv(1024)
                     responsemsg = responsemsg + data
-                    log.debug('NetRNG client: receive cycle end')
                     if SOCKET_DELIMITER in responsemsg:
                         responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                         break
