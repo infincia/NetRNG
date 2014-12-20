@@ -122,16 +122,9 @@ class NetRNGServer(object):
                 request = msgpack.unpackb(requestmsg)
                 # reset buffer for next loop
                 requestmsg = ""
-                if request['get'] == 'config':
-                    log.debug('NetRNG server: sending configuration to %s', address)
-                    response = {'push': 'config', 'config': {'max_clients': self.max_clients, 'sample_size_bytes': self.sample_size_bytes}}
-                    log.debug('NetRNG server: sending response %s', response)
-                    responsemsg = msgpack.packb(response)
-                    sock.sendall(responsemsg + SOCKET_DELIMITER)
-                    log.debug('NetRNG server: response sent')
-                elif request['get'] == 'sample':
                 log.debug('NetRNG server: receive cycle done')
                 log.debug('NetRNG server: request received %s', request)
+                if request['get'] == 'sample':
                     with self.lock:
                         log.debug('NetRNG server: lock acquired %s', self.lock)
                         sample = self.hwrng.read(self.sample_size_bytes)
@@ -189,20 +182,15 @@ class NetRNGClient(object):
         # Address of the server to connect to
         self.server_address = netrng_config.get('Client', 'server_address')
 
-        # Size of each incoming sample, retrieved from the server at runtime
-        self.sample_size_bytes = 0
-
-        # Retrieved from server at runtime
-        self.server_max_clients = 0
-
-        # Configuration state
-        self.configured = False
-
         # Connection state
         self.connected = False
 
-        # rngd subprocess
-        self.rngd = None
+        # client socket for connecting to server
+        self.rngd = gevent.subprocess.Popen(['rngd','-f','-r','/dev/stdin'],
+                                               stdin=gevent.subprocess.PIPE,
+                                               stdout=open(os.devnull, 'w'),
+                                               stderr=open(os.devnull, 'w'),
+                                               close_fds=True)
 
         # client socket for connecting to server
         self.sock = None
@@ -226,34 +214,9 @@ class NetRNGClient(object):
                     self.sock.connect((self.server_address, self.port))
                     log.debug('NetRNG client: connected to ("%s", %d)', self.server_address, self.port)
                     self.connected = True
-                if not self.configured:
-                    log.debug('NetRNG client: requesting configuration from server')
-                    request = {'get': 'config'}
-                    log.debug('NetRNG client: request %s', request)
-                    requestmsg = msgpack.packb(request)
-                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
-                    responsemsg = ""
-                    while True:
-                        data = self.sock.recv(1024)
-                        responsemsg = responsemsg + data
-                        log.debug('NetRNG client: receive cycle: %s', responsemsg)
-                        if SOCKET_DELIMITER in responsemsg:
-                            responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
-                            break
-                    log.debug('NetRNG client: receive cycle done')
-                    response = msgpack.unpackb(responsemsg)
-                    if response['push'] == 'config':
-                        log.debug('NetRNG client: config received %s', response)
-                        server_config = response['config']
-                        self.server_max_clients = server_config['max_clients']
-                        self.sample_size_bytes = server_config['sample_size_bytes']
-                        self.configured = True
-                        rngd = gevent.subprocess.Popen(['rngd','-f','-r','/dev/stdin'],
-                                            stdin=gevent.subprocess.PIPE,
-                                            stdout=open(os.devnull, 'w'),
-                                            stderr=open(os.devnull, 'w'),
-                                            close_fds=True)
-                        log.debug('NetRNG client: started rngd configured for %d byte samples', self.sample_size_bytes)
+
+
+                # request a new sample
                 log.debug('NetRNG client: requesting sample')
                 request = {'get': 'sample'}
                 requestmsg = msgpack.packb(request)
@@ -273,16 +236,19 @@ class NetRNGClient(object):
                 if response['push'] == 'sample':
                     sample = response['sample']
                     log.debug('NetRNG client: received %d byte sample', len(sample))
-                    rngd.stdin.write(sample)
-                    rngd.stdin.flush()
-            except socket.error, msg:
+                    self.rngd.stdin.write(sample)
+                    self.rngd.stdin.flush()
+                else:
+                    log.debug('NetRNG client: received unknown response from server')
+
+            except socket.error as socket_exception:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
                 time.sleep(10)
-            except KeyboardInterrupt as e:
+            except KeyboardInterrupt as keyboard_exception:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
                 break
-            except Exception as e:
-                log.exception('NetRNG client: exception %s', e)
+            except Exception as unknown_exception:
+                log.exception('NetRNG client: unknown exception %s', unknown_exception)
             finally:
                 self.connected = False
                 self.sock.close()
