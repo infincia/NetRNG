@@ -264,13 +264,16 @@ class NetRNGClient(object):
 
             except socket.error as socket_exception:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
+                self.connected = False
+                self.sock.close()
                 time.sleep(10)
             except KeyboardInterrupt as keyboard_exception:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
+                self.connected = False
+                self.sock.close()
                 break
             except Exception as unknown_exception:
                 log.exception('NetRNG client: unknown exception %s', unknown_exception)
-            finally:
                 self.connected = False
                 self.sock.close()
         sys.exit(0)
