@@ -18,7 +18,7 @@ import gevent.subprocess
 from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent.coros import RLock
-
+from gevent import Timeout
 
 
 
@@ -109,19 +109,20 @@ class NetRNGServer(object):
     
         '''
         log.debug('NetRNG server: client connected %s', address)
-        requestmsg = ""
+
         try:
             while True:
                 log.debug('NetRNG server: receive cycle start')
-                data = sock.recv(1024)
-                requestmsg = requestmsg + data
-                log.debug('NetRNG server: receive cycle: %s', requestmsg)
-                if not SOCKET_DELIMITER in requestmsg:
-                    continue
+                requestmsg = ""
+                with Timeout(5, False):
+                    while True:
+                        data = sock.recv(1024)
+                        requestmsg = requestmsg + data
+                        log.debug('NetRNG server: receive cycle: %s', requestmsg)
+                        if SOCKET_DELIMITER in requestmsg:
+                            break
                 requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
                 request = msgpack.unpackb(requestmsg)
-                # reset buffer for next loop
-                requestmsg = ""
                 log.debug('NetRNG server: receive cycle done')
                 log.debug('NetRNG server: request received %s', request)
                 if request['get'] == 'sample':
