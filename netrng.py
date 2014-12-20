@@ -95,7 +95,7 @@ class NetRNGServer(object):
         self.hwrng = open(self.hwrng_device, 'r')
         
         # lock to prevent multiple clients from getting the same random samples
-        self.lock = RLock()
+        self.rng_lock = RLock()
 
 
 
@@ -125,7 +125,7 @@ class NetRNGServer(object):
                 log.debug('NetRNG server: receive cycle done')
                 log.debug('NetRNG server: request received %s', request)
                 if request['get'] == 'sample':
-                    with self.lock:
+                    with self.rng_lock:
                         log.debug('NetRNG server: lock acquired %s', self.lock)
                         sample = self.hwrng.read(self.sample_size_bytes)
                     log.debug('NetRNG server: lock release')
