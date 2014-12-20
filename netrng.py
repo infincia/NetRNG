@@ -126,9 +126,9 @@ class NetRNGServer(object):
                 log.debug('NetRNG server: request received %s', request)
                 if request['get'] == 'sample':
                     with self.rng_lock:
-                        log.debug('NetRNG server: lock acquired %s', self.lock)
+                        log.debug('NetRNG server: rng lock acquired')
                         sample = self.hwrng.read(self.sample_size_bytes)
-                    log.debug('NetRNG server: lock release')
+                    log.debug('NetRNG server: rng lock released')
                     log.debug('NetRNG server: sending response')
                     responsemsg = msgpack.packb({'push': 'sample', 'sample': sample})
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
