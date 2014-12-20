@@ -174,7 +174,8 @@ class NetRNGServer(object):
         self.server = StreamServer((self.listen_address, self.port), self.serve, spawn=self.pool)
         log.debug('NetRNG server: serving up to %d connections on %s:%d)', self.max_clients, self.listen_address, self.port)
         try:
-            self.server.serve_forever()
+            self.server.start()
+            gevent.wait()
         except KeyboardInterrupt as e:
             log.debug('NetRNG server: exiting due to keyboard interrupt')
             sys.exit(0)
