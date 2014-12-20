@@ -238,7 +238,7 @@ class NetRNGClient(object):
                 log.debug('NetRNG client: requesting sample')
                 requestmsg = msgpack.packb({'get': 'sample'})
                 self.sock.sendall(requestmsg + SOCKET_DELIMITER)
-                log.debug('NetRNG client: request sent %s', request)
+                log.debug('NetRNG client: sample request sent')
 
 
                 # wait for response
