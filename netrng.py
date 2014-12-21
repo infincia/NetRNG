@@ -122,6 +122,7 @@ class NetRNGServer(object):
                         log.debug('NetRNG server: receive cycle: %s', requestmsg)
                         if SOCKET_DELIMITER in requestmsg:
                             break
+                        gevent.sleep()
                 requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
                 request = msgpack.unpackb(requestmsg)
                 log.debug('NetRNG server: receive cycle done')
@@ -255,6 +256,7 @@ class NetRNGClient(object):
                         log.debug('NetRNG client: receive cycle: %s', responsemsg)
                         if SOCKET_DELIMITER in responsemsg:
                             break
+                        gevent.sleep()
                 responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                 response = msgpack.unpackb(responsemsg)
                 log.debug('NetRNG client: receive cycle done')
