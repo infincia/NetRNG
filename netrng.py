@@ -249,11 +249,12 @@ class NetRNGClient(object):
                 # wait for response
                 log.debug('NetRNG client: receive cycle start')
                 responsemsg = ""
-                while True:
-                    data = self.sock.recv(1024)
-                    responsemsg = responsemsg + data
-                    if SOCKET_DELIMITER in responsemsg:
-                        break
+                with Timeout(5, gevent.Timeout):
+                    while True:
+                        data = self.sock.recv(1024)
+                        responsemsg = responsemsg + data
+                        if SOCKET_DELIMITER in responsemsg:
+                            break
                 responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                 response = msgpack.unpackb(responsemsg)
                 log.debug('NetRNG client: receive cycle done')
@@ -269,6 +270,11 @@ class NetRNGClient(object):
 
             except socket.error as socket_exception:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
+                self.connected = False
+                self.sock.close()
+                time.sleep(10)
+            except gevent.Timeout as timeout:
+                log.debug('NetRNG client: server socket timeout')
                 self.connected = False
                 self.sock.close()
                 time.sleep(10)
