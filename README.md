@@ -1,4 +1,7 @@
-#NOTE: The master branch of this code is still unstable, but the zeromq branch seems to work fairly well, it's what I use at home right now. The only thing it lacks is the ability to limit connected clients automatically.
+#####NOTE: 
+
+**The master branch of this code is still unstable**. Use the zeromq branch if you need
+something that is mostly reliable. The readme in that branch explains more.
 
 #NetRNG
 
@@ -105,11 +108,8 @@ client requires setting the right server address and setting the mode to 'client
 The rest of the configuration should be fine unless you have a very slow HWRNG and need
 to tweak the data flow settings. Some of this may be automated in the future.
 
-The defaults send 1KB/s of random data to each connected client, if your HWRNG 
-can support faster rates, change sample_size_bytes to something larger. I want 
-to automate this soon by measuring the HWRNG performance at runtime and adjust 
-the sample setting to divide it by the number of connected clients so
-there is always an even split.
+The defaults send 2KB chunks of random data to each connected client as fast as possible. 
+You can tweak sample_size_bytes if needed, but it should work fine in most cases.
 
 
 ###Run directly for testing
