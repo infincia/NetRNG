@@ -115,7 +115,7 @@ class NetRNGServer(object):
             while True:
                 log.debug('NetRNG server: receive cycle start')
                 requestmsg = ""
-                with Timeout(5, True):
+                with Timeout(5, gevent.Timeout):
                     while True:
                         data = sock.recv(1024)
                         requestmsg = requestmsg + data
@@ -140,8 +140,8 @@ class NetRNGServer(object):
                     log.debug('NetRNG server: client disconnected %s', address)
             else:
                 log.exception('NetRNG server: socket error %s', e)
-        except Timeout as timeout:
-            log.exception('NetRNG server: client socket timeout')
+        except gevent.Timeout as timeout:
+            log.debug('NetRNG server: client socket timeout')
         except Exception as e:
             log.exception('NetRNG server: %s', e)
         finally:
