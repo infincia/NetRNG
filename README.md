@@ -1,6 +1,6 @@
 #####NOTE: 
 
-**The master branch of this code is alpha quality but working**. 
+**The master branch of this code is alpha quality but usable**. 
 
 Reconnection seems to be working when either server or client restarts or fails 
 to properly close the socket connection. It's a simple timeout on both sides, which 
