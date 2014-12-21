@@ -119,7 +119,7 @@ class NetRNGServer(object):
                     while True:
                         data = sock.recv(1024)
                         requestmsg = requestmsg + data
-                        log.debug('NetRNG server: receive cycle: %s', requestmsg)
+                        log.debug('NetRNG server: receive cycle')
                         if SOCKET_DELIMITER in requestmsg:
                             break
                         gevent.sleep()
@@ -253,7 +253,7 @@ class NetRNGClient(object):
                     while True:
                         data = self.sock.recv(1024)
                         responsemsg = responsemsg + data
-                        log.debug('NetRNG client: receive cycle: %s', responsemsg)
+                        log.debug('NetRNG client: receive cycle')
                         if SOCKET_DELIMITER in responsemsg:
                             break
                         gevent.sleep()
