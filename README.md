@@ -1,7 +1,14 @@
 #####NOTE: 
 
-**The master branch of this code is still unstable**. Use the zeromq branch if you need
-something that is mostly reliable. The readme in that branch explains more.
+**The master branch of this code is alpha quality but working**. 
+
+Reconnection seems to be working when either server or client restarts or fails 
+to properly close the socket connection. It's a simple timeout on both sides, which 
+will cause a disconnection even if the other side hasn't actually disappeared but is
+simply idle. However that may be a desirable quality in order to allow other clients
+to connect when currently connected clients are idle, in other words if the server
+is configured to allow 2 clients, but one of them isn't actively requesting entropy,
+it will be disconnected after 5 seconds and allow another client to connect.
 
 #NetRNG
 
