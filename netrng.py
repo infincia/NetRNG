@@ -1,3 +1,4 @@
+from gevent import monkey; monkey.patch_all()
 # standard libraries
 
 import time
