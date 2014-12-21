@@ -274,12 +274,12 @@ class NetRNGClient(object):
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
                 self.connected = False
                 self.sock.close()
-                time.sleep(10)
+                gevent.sleep(10)
             except gevent.Timeout as timeout:
                 log.debug('NetRNG client: server socket timeout')
                 self.connected = False
                 self.sock.close()
-                time.sleep(10)
+                gevent.sleep(1)
             except KeyboardInterrupt as keyboard_exception:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
                 self.connected = False
