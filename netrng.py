@@ -1,3 +1,5 @@
+from __future__ import division
+
 from gevent import monkey; monkey.patch_all()
 # standard libraries
 
