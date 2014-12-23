@@ -159,6 +159,10 @@ class NetRNGServer(object):
                     log.debug('NetRNG server: sending response')
                     responsemsg = msgpack.packb({'push': 'sample', 'sample': sample})
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
+                if request['get'] == 'heartbeat':
+                    log.debug('NetRNG server: sending heartbeat response to %s', address)
+                    responsemsg = msgpack.packb({'push': 'heartbeat'})
+                    sock.sendall(responsemsg + SOCKET_DELIMITER)
         except socket.error as e:
             if isinstance(e.args, tuple):
                 if e[0] == errno.EPIPE:
