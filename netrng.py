@@ -169,7 +169,7 @@ class NetRNGServer(object):
         received_entropy_size = len(received_entropy)
         received_entropy_per_second = received_entropy_size / calibration_period
         log.debug('NetRNG server: completed entropy source performance calibration')
-        log.debug('NetRNG server: entropy source can provide %d bytes per second')
+        log.debug('NetRNG server: entropy source can provide %.2f bytes per second', received_entropy_per_second)
 
     def start(self):
         '''
