@@ -4,8 +4,6 @@ from __future__ import division
 
     A network connected random number generator
 
-    v0.2-prerelease
-
     Copyright 2014 Infincia LLC
     
     See LICENSE file for license information
