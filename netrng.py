@@ -122,7 +122,7 @@ class NetRNGServer(object):
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
         log.debug('NetRNG server: registering service with Bonjour: %s', info)
-        self.register_service(info)
+        self.zeroconf.register_service(info)
 
 
 
