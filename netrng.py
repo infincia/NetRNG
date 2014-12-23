@@ -1,5 +1,22 @@
 from __future__ import division
 
+""" NetRNG 
+
+    A network connected random number generator
+
+    v0.2-prerelease
+
+    Copyright 2014 Infincia LLC
+    
+    See LICENSE file for license information
+
+"""
+
+__author__ = 'Stephen Oliver'
+__maintainer__ = 'Stephen Oliver <steve@infincia.com>'
+__version__ = '0.2-prerelease'
+__license__ = 'MIT'
+
 from gevent import monkey; monkey.patch_all()
 # standard libraries
 
