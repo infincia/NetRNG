@@ -36,7 +36,7 @@ from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent.coros import RLock
 from gevent import Timeout
-from zeroconf import ServiceBrowser, Zeroconf
+from zeroconf import ServiceBrowser, Zeroconf, ServiceInfo
 
 
 '''
