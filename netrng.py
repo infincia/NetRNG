@@ -327,6 +327,7 @@ class NetRNGClient(object):
 if __name__ == '__main__':
     if NETRNG_MODE == 'server':
         server = NetRNGServer()
+        server.broadcast_service()
         server.start()
     elif NETRNG_MODE == 'client':
         client = NetRNGClient()
