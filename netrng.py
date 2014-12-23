@@ -38,7 +38,7 @@ from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent.coros import RLock
 from gevent import Timeout
-
+from zeroconf import ServiceBrowser, Zeroconf
 
 
 '''
@@ -116,7 +116,15 @@ class NetRNGServer(object):
         # lock to prevent multiple clients from getting the same random samples
         self.rng_lock = RLock()
 
+        self.zeroconf = Zeroconf()
 
+
+    def broadcast_service(self):
+
+        desc = {'version': __version__}
+        info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
+        log.debug('NetRNG server: registering service with Bonjour: %s', info)
+        self.register_service(info)
 
 
 
@@ -236,7 +244,10 @@ class NetRNGClient(object):
         # client socket for connecting to server
         self.sock = None
     
-    
+        self.zeroconf = Zeroconf()
+
+
+
     def stream(self):
         '''
             Opens a connection to the server, configures the sample size to
