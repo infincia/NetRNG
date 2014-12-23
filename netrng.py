@@ -17,9 +17,10 @@ __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
 __version__ = '0.2-prerelease'
 __license__ = 'MIT'
 
+# monkey patch for gevent
 from gevent import monkey; monkey.patch_all()
-# standard libraries
 
+# standard libraries
 import time
 import sys
 import os
@@ -31,8 +32,6 @@ import errno
 import signal
 
 # pip packages
-
-
 import gevent
 import gevent.subprocess
 from gevent.server import StreamServer
