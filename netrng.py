@@ -124,7 +124,9 @@ class NetRNGServer(object):
         log.debug('NetRNG server: registering service with Bonjour: %s', info)
         self.zeroconf.registerService(info)
 
-
+    def unregister_service(self):
+        log.debug('NetRNG server: unregistering all bonjour services')
+        self.zeroconf.unregisterAllServices()
 
     def serve(self, sock, address):
         '''
