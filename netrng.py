@@ -118,7 +118,6 @@ class NetRNGServer(object):
 
 
     def broadcast_service(self):
-
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
         log.debug('NetRNG server: registering service with Bonjour: %s', info)
