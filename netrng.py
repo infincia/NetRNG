@@ -329,7 +329,10 @@ class NetRNGClient(object):
 if __name__ == '__main__':
     if NETRNG_MODE == 'server':
         server = NetRNGServer()
-        server.start()
+        try:
+            server.start()
+        finally:
+            server.stop()
     elif NETRNG_MODE == 'client':
         client = NetRNGClient()
         client.stream()
