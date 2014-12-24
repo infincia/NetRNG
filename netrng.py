@@ -206,6 +206,15 @@ class NetRNGServer(object):
             sys.exit(0)
 
 
+    def stop(self):
+        '''
+            Server stops listening on the TCP socket, stops accepting new connections
+            and finally kills spawned connection handlers
+
+        '''
+        log.debug('NetRNG server: stopping server and killing existing client connections')
+        self.server.stop()
+
 
 
 
