@@ -32,6 +32,7 @@ import signal
 # pip packages
 import gevent
 import gevent.subprocess
+import gevent.queue
 from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent.coros import RLock
@@ -140,7 +141,7 @@ class NetRNGServer(object):
             while True:
                 log.debug('NetRNG server: receive cycle start')
                 requestmsg = ""
-                with Timeout(5, gevent.Timeout):
+                with Timeout(3, gevent.Timeout):
                     while True:
                         data = sock.recv(1024)
                         requestmsg = requestmsg + data
@@ -260,6 +261,24 @@ class NetRNGClient(object):
 
 
 
+
+        # queue for pushing received samples to the rngd subprocess as needed
+        self.rngd_queue = gevent.queue.Queue(maxsize=10)
+
+
+    def rngd_handler(self):
+        '''
+            Iterates over the rngd_queue
+
+        '''
+        log.debug('NetRNG client: starting rngd queue greenlet')
+        while True:
+            sample = self.rngd_queue.get()
+            self.rngd.stdin.write(sample)
+            self.rngd.stdin.flush()
+            gevent.sleep()
+
+
     def stream(self):
         '''
             Opens a connection to the server, configures the sample size to
@@ -276,21 +295,29 @@ class NetRNGClient(object):
                 if not self.connected:
                     self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.sock.connect((self.server_address, self.port))
-                    log.debug('NetRNG client: connected to %s:%d)', self.server_address, self.port)
+                    log.debug('NetRNG client: connected to %s:%d', self.server_address, self.port)
                     self.connected = True
 
 
-                # request a new sample
-                log.debug('NetRNG client: requesting sample')
-                requestmsg = msgpack.packb({'get': 'sample'})
-                self.sock.sendall(requestmsg + SOCKET_DELIMITER)
-                log.debug('NetRNG client: sample request sent')
+
+                if self.rngd_queue.full():
+                    # send a keepalive to the server
+                    log.debug('NetRNG client: sending heartbeat message')
+                    requestmsg = msgpack.packb({'get': 'heartbeat'})
+                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    log.debug('NetRNG client: heartbeat request sent')
+                else:
+                    # request a new sample
+                    log.debug('NetRNG client: requesting sample')
+                    requestmsg = msgpack.packb({'get': 'sample'})
+                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    log.debug('NetRNG client: sample request sent')
 
 
                 # wait for response
                 log.debug('NetRNG client: receive cycle start')
                 responsemsg = ""
-                with Timeout(5, gevent.Timeout):
+                with Timeout(2, gevent.Timeout):
                     while True:
                         data = self.sock.recv(1024)
                         responsemsg = responsemsg + data
@@ -298,6 +325,7 @@ class NetRNGClient(object):
                         if SOCKET_DELIMITER in responsemsg:
                             break
                         gevent.sleep()
+
                 responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
                 response = msgpack.unpackb(responsemsg)
                 log.debug('NetRNG client: receive cycle done')
@@ -306,8 +334,10 @@ class NetRNGClient(object):
                 if response['push'] == 'sample':
                     sample = response['sample']
                     log.debug('NetRNG client: received %d byte sample', len(sample))
-                    self.rngd.stdin.write(sample)
-                    self.rngd.stdin.flush()
+                    self.rngd_queue.put(sample)
+                elif response['push'] == 'heartbeat':
+                    log.debug('NetRNG client: received heartbeat response')
+                    gevent.sleep(1)
                 else:
                     log.debug('NetRNG client: received unknown response from server')
 
@@ -333,6 +363,25 @@ class NetRNGClient(object):
         sys.exit(0)
 
 
+    def start(self):
+        '''
+            Client spawns a greenlet for the rngd handler and the network stream
+            connection, then joins and waits for them to block the caller
+
+        '''
+        log.debug('NetRNG client: spawning greenlets for rngd and stream')
+        try:
+            rngd_greenlet = gevent.spawn(self.rngd_handler)
+            stream_greenlet = gevent.spawn(self.stream)
+            greenlets = [stream_greenlet, rngd_greenlet]
+            gevent.joinall(greenlets)
+        except KeyboardInterrupt as e:
+            log.debug('NetRNG client: exiting due to keyboard interrupt')
+            gevent.killall(greenlets)
+            sys.exit(0)
+
+
+
 '''
     Select correct mode based on configuration and start
     
@@ -349,7 +398,7 @@ if __name__ == '__main__':
             server.stop()
     elif NETRNG_MODE == 'client':
         client = NetRNGClient()
-        client.stream()
+        client.start()
     else:
         log.error('NetRNG: no mode selected, quitting')
         sys.exit(1)
