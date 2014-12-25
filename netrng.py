@@ -215,6 +215,15 @@ class NetRNGServer(object):
             sys.exit(0)
 
 
+    def stop(self):
+        '''
+            Server stops listening on the TCP socket, stops accepting new connections
+            and finally kills spawned connection handlers
+
+        '''
+        log.debug('NetRNG server: stopping server and killing existing client connections')
+        self.server.stop()
+
 
 
 
@@ -332,8 +341,12 @@ class NetRNGClient(object):
 if __name__ == '__main__':
     if NETRNG_MODE == 'server':
         server = NetRNGServer()
-        server.broadcast_service()
-        server.start()
+        try:
+            server.start()
+            server.broadcast_service()
+        finally:
+            server.unregister_service()
+            server.stop()
     elif NETRNG_MODE == 'client':
         client = NetRNGClient()
         client.stream()
