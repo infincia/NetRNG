@@ -281,7 +281,7 @@ class NetRNGClient(object):
                 if not self.connected:
                     self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.sock.connect((self.server_address, self.port))
-                    log.debug('NetRNG client: connected to %s:%d)', self.server_address, self.port)
+                    log.debug('NetRNG client: connected to %s:%d', self.server_address, self.port)
                     self.connected = True
 
 
