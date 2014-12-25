@@ -258,11 +258,14 @@ class NetRNGClient(object):
 
         '''
         log.debug('NetRNG client: starting rngd queue greenlet')
-        while True:
-            sample = self.rngd_queue.get()
-            self.rngd.stdin.write(sample)
-            self.rngd.stdin.flush()
-            gevent.sleep()
+        try:
+            while True:
+                sample = self.rngd_queue.get()
+                self.rngd.stdin.write(sample)
+                self.rngd.stdin.flush()
+                gevent.sleep()
+        except OSError:
+            return
 
     
     def stream(self):
