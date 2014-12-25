@@ -132,7 +132,7 @@ class NetRNGServer(object):
             while True:
                 log.debug('NetRNG server: receive cycle start')
                 requestmsg = ""
-                with Timeout(5, gevent.Timeout):
+                with Timeout(3, gevent.Timeout):
                     while True:
                         data = sock.recv(1024)
                         requestmsg = requestmsg + data
@@ -303,7 +303,7 @@ class NetRNGClient(object):
                 # wait for response
                 log.debug('NetRNG client: receive cycle start')
                 responsemsg = ""
-                with Timeout(5, gevent.Timeout):
+                with Timeout(2, gevent.Timeout):
                     while True:
                         data = self.sock.recv(1024)
                         responsemsg = responsemsg + data
