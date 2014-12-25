@@ -321,7 +321,7 @@ class NetRNGClient(object):
                     sample = response['sample']
                     log.debug('NetRNG client: received %d byte sample', len(sample))
                     self.rngd_queue.put(sample)
-                else if response['push'] == 'heartbeat':
+                elif response['push'] == 'heartbeat':
                     log.debug('NetRNG client: received heartbeat response')
                     gevent.sleep(1)
                 else:
