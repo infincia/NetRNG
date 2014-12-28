@@ -184,7 +184,8 @@ class NetRNGServer(object):
         received_entropy = ""
         stop_time = time.time() + calibration_period
         while time.time() < stop_time:
-            received_entropy += self.hwrng.read(self.sample_size_bytes)
+            with self.rng_lock:
+                received_entropy += self.hwrng.read(self.sample_size_bytes)
         received_entropy_size = len(received_entropy)
         received_entropy_per_second = received_entropy_size / calibration_period
         log.debug('NetRNG server: completed entropy source performance calibration')
