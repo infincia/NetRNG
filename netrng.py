@@ -233,7 +233,7 @@ class NetRNGClient(object):
         NetRNG client
     
     '''
-    def __init__(self, server_address, port):
+    def __init__(self, server_address=None, port=None):
 
         # Address of the server to connect to
         self.server_address = server_address
