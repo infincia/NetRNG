@@ -84,7 +84,12 @@ class NetRNGServer(object):
     
     
     
-    def __init__(self, listen_address=None, port=None, max_clients=None, sample_size_bytes=None, hwrng_device=None):
+    def __init__(self,
+                 listen_address=None,
+                 port=None,
+                 max_clients=None,
+                 sample_size_bytes=None,
+                 hwrng_device=None):
 
         # Listen address used by the server
         self.listen_address = listen_address
