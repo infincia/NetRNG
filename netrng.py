@@ -48,9 +48,6 @@ from gevent import Timeout
 netrng_config = ConfigParser.ConfigParser()
 netrng_config.read('/etc/netrng.conf')
 
-# whether we're in client or server mode
-NETRNG_MODE = netrng_config.get('Global', 'mode')
-
 # logging level
 DEBUG = netrng_config.getboolean('Global', 'debug')
 
@@ -87,13 +84,13 @@ class NetRNGServer(object):
     
     
     
-    def __init__(self):
+    def __init__(self, listen_address=None, port=None, max_clients=None, sample_size_bytes=None, hwrng_device=None):
 
         # Listen address used by the server
-        self.listen_address = netrng_config.get('Server', 'listen_address')
+        self.listen_address = listen_address
 
         # TCP port to listen on
-        self.port = netrng_config.getint('Global', 'port')
+        self.port = port
 
 
 
@@ -102,16 +99,16 @@ class NetRNGServer(object):
         # how fast your HWRNG can be read. A device that can spit out 1mbps (100KB/s) could
         # give 100 clients 1KB/s, but a device that can only generate 128bps may only
         # be able to serve 1 client slowly
-        self.max_clients = netrng_config.getint('Server', 'max_clients')
+        self.max_clients = max_clients
 
         # How much random data to request from the device for each client push
-        self.sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
+        self.sample_size_bytes = sample_size_bytes
 
 
 
         # Source device to use for random data, should be something fast and
         # high quality, DON'T set this to /dev/random
-        self.hwrng_device = netrng_config.get('Server', 'hwrng_device')
+        self.hwrng_device = hwrng_device
 
         # open the hwrng for reading later during client requests
         self.hwrng = open(self.hwrng_device, 'r')
@@ -236,13 +233,13 @@ class NetRNGClient(object):
         NetRNG client
     
     '''
-    def __init__(self):
+    def __init__(self, server_address, port):
 
         # Address of the server to connect to
-        self.server_address = netrng_config.get('Client', 'server_address')
+        self.server_address = server_address
     
         # TCP port to connect to on the server
-        self.port = netrng_config.getint('Global', 'port')
+        self.port = port
 
 
 
@@ -389,15 +386,32 @@ class NetRNGClient(object):
 '''
 
 if __name__ == '__main__':
-    if NETRNG_MODE == 'server':
-        server = NetRNGServer()
+    mode = netrng_config.get('Global', 'mode')
+    port = netrng_config.getint('Global', 'port')
+
+    if mode == 'server':
+        listen_address    = netrng_config.get('Server', 'listen_address')
+        max_clients       = netrng_config.getint('Server', 'max_clients')
+        sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
+        hwrng_device      = netrng_config.get('Server', 'hwrng_device')
+
+        server = NetRNGServer(listen_address=listen_address,
+                              port=port,
+                              max_clients=max_clients,
+                              sample_size_bytes=sample_size_bytes,
+                              hwrng_device=hwrng_device)
+
         try:
             server.start()
         finally:
             server.stop()
-    elif NETRNG_MODE == 'client':
-        client = NetRNGClient()
+
+    elif mode == 'client':
+        server_address = netrng_config.get('Client', 'server_address')
+
+        client = NetRNGClient(server_address=server_address, port=port)
         client.start()
+
     else:
         log.error('NetRNG: no mode selected, quitting')
         sys.exit(1)
