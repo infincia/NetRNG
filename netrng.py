@@ -245,8 +245,6 @@ class NetRNGClient(object):
         self.port = netrng_config.getint('Global', 'port')
 
 
-        # Connection state
-        self.connected = False
 
         # client socket for connecting to server
         self.rngd = gevent.subprocess.Popen(['rngd','-f','-r','/dev/stdin'],
@@ -254,9 +252,6 @@ class NetRNGClient(object):
                                                stdout=open(os.devnull, 'w'),
                                                stderr=open(os.devnull, 'w'),
                                                close_fds=True)
-
-        # client socket for connecting to server
-        self.sock = None
 
         # queue for pushing received samples to the rngd subprocess as needed
         self.rngd_queue = gevent.queue.Queue(maxsize=10)
@@ -289,13 +284,20 @@ class NetRNGClient(object):
 
         '''
         log.debug('NetRNG client: initializing')
+
+        # client socket for connecting to server
+        server_socket = None
+
+        # Connection state
+        server_connected = False
+
         while True:
             try:
-                if not self.connected:
-                    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    self.sock.connect((self.server_address, self.port))
+                if not server_connected:
+                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    server_socket.connect((self.server_address, self.port))
                     log.debug('NetRNG client: connected to %s:%d', self.server_address, self.port)
-                    self.connected = True
+                    server_connected = True
 
 
 
@@ -303,13 +305,13 @@ class NetRNGClient(object):
                     # send a keepalive to the server
                     log.debug('NetRNG client: sending heartbeat message')
                     requestmsg = msgpack.packb({'get': 'heartbeat'})
-                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    server_socket.sendall(requestmsg + SOCKET_DELIMITER)
                     log.debug('NetRNG client: heartbeat request sent')
                 else:
                     # request a new sample
                     log.debug('NetRNG client: requesting sample')
                     requestmsg = msgpack.packb({'get': 'sample'})
-                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    server_socket.sendall(requestmsg + SOCKET_DELIMITER)
                     log.debug('NetRNG client: sample request sent')
 
 
@@ -318,7 +320,7 @@ class NetRNGClient(object):
                 responsemsg = ""
                 with Timeout(2, gevent.Timeout):
                     while True:
-                        data = self.sock.recv(1024)
+                        data = server_socket.recv(1024)
                         responsemsg = responsemsg + data
                         log.debug('NetRNG client: receive cycle')
                         if SOCKET_DELIMITER in responsemsg:
@@ -342,23 +344,23 @@ class NetRNGClient(object):
 
             except socket.error as socket_exception:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
                 gevent.sleep(10)
             except gevent.Timeout as timeout:
                 log.debug('NetRNG client: server socket timeout')
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
                 gevent.sleep(1)
             except KeyboardInterrupt as keyboard_exception:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
                 break
             except Exception as unknown_exception:
                 log.exception('NetRNG client: unknown exception %s', unknown_exception)
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
         sys.exit(0)
 
 
