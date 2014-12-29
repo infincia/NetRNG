@@ -90,6 +90,7 @@ class NetRNGServer(object):
                  max_clients=None,
                  sample_size_bytes=None,
                  hwrng_device=None):
+        log.debug('NetRNG server: initializing')
 
         # Listen address used by the server
         self.listen_address = listen_address
@@ -239,6 +240,7 @@ class NetRNGClient(object):
     
     '''
     def __init__(self, server_address=None, port=None):
+        log.debug('NetRNG client: initializing')
 
         # Address of the server to connect to
         self.server_address = server_address
@@ -285,7 +287,7 @@ class NetRNGClient(object):
             starting/stopping/configuring it at the right times
 
         '''
-        log.debug('NetRNG client: initializing')
+        log.debug('NetRNG client: starting stream greenlet')
 
         # client socket for connecting to server
         server_socket = None
