@@ -237,12 +237,13 @@ class NetRNGClient(object):
     
     '''
     def __init__(self):
+
+        # Address of the server to connect to
+        self.server_address = netrng_config.get('Client', 'server_address')
     
         # TCP port to connect to on the server
         self.port = netrng_config.getint('Global', 'port')
 
-        # Address of the server to connect to
-        self.server_address = netrng_config.get('Client', 'server_address')
 
         # Connection state
         self.connected = False
