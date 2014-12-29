@@ -89,18 +89,13 @@ class NetRNGServer(object):
     
     def __init__(self):
 
-        # TCP port to listen on
-        self.port = netrng_config.getint('Global', 'port')
-
-        # How much random data to request from the device for each client push
-        self.sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
-
         # Listen address used by the server
         self.listen_address = netrng_config.get('Server', 'listen_address')
 
-        # Source device to use for random data, should be something fast and
-        # high quality, DON'T set this to /dev/random
-        self.hwrng_device = netrng_config.get('Server', 'hwrng_device')
+        # TCP port to listen on
+        self.port = netrng_config.getint('Global', 'port')
+
+
 
         # Maximum number of clients to accept, this prevents your HWRNG from being
         # overloaded, starving clients. This requires testing and depends entirely on
@@ -109,8 +104,21 @@ class NetRNGServer(object):
         # be able to serve 1 client slowly
         self.max_clients = netrng_config.getint('Server', 'max_clients')
 
+        # How much random data to request from the device for each client push
+        self.sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
+
+
+
+        # Source device to use for random data, should be something fast and
+        # high quality, DON'T set this to /dev/random
+        self.hwrng_device = netrng_config.get('Server', 'hwrng_device')
+
         # open the hwrng for reading later during client requests
         self.hwrng = open(self.hwrng_device, 'r')
+
+
+
+
         
         # lock to prevent multiple clients from getting the same random samples
         self.rng_lock = RLock()
