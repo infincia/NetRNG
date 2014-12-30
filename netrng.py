@@ -273,6 +273,8 @@ class NetRNGClient(object):
                 self.rngd.stdin.write(sample)
                 self.rngd.stdin.flush()
                 gevent.sleep()
+        except gevent.GreenletExit as exit:
+            log.debug('NetRNG client: rngd queue greenlet exiting due to graceful quit')
         except OSError:
             return
 
@@ -361,6 +363,11 @@ class NetRNGClient(object):
                 server_connected = False
                 server_socket.close()
                 break
+            except gevent.GreenletExit as exit:
+                log.debug('NetRNG client: stream greenlet exiting due to graceful quit')
+                server_connected = False
+                server_socket.close()
+                break
             except Exception as unknown_exception:
                 log.exception('NetRNG client: unknown exception %s', unknown_exception)
                 server_connected = False
@@ -382,6 +389,7 @@ class NetRNGClient(object):
             gevent.joinall(greenlets)
         except KeyboardInterrupt as e:
             log.debug('NetRNG client: exiting due to keyboard interrupt')
+        finally:
             gevent.killall(greenlets)
             sys.exit(0)
 
