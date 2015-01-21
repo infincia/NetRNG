@@ -12,7 +12,7 @@ from __future__ import division
 
 __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
-__version__ = '0.2-prerelease'
+__version__ = '0.2a0'
 __license__ = 'MIT'
 
 # monkey patch for gevent
