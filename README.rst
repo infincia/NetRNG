@@ -1,4 +1,6 @@
-#NetRNG
+============================
+NetRNG
+============================
 
 **Note: The master branch of this code is alpha quality but usable**.
 
@@ -15,7 +17,8 @@ No application or kernel changes are required on NetRNG Client machines; any
 application using ``/dev/random`` and ``/dev/urandom`` will automatically and 
 transparently receive entropy from the NetRNG server.
 
-##Why it exists
+Why it exists
+-------------
 
 EntropyBroker is the closest similar project I know of, but it didn't build when I
 tried to use it, and the code seems quite large and complicated for a task that,
@@ -25,7 +28,8 @@ So I wrote NetRNG. It's simple code, easy to maintain, easy to deploy, and with
 the exception of some network protocol issues before v0.1, it works quite 
 well.
 
-##Current state of the code at v0.1:  
+Current state of the code at v0.1 
+---------------------------------
 
 Reconnection seems to be working when either the server or client restarts, or 
 fails to properly close the socket connection. 
@@ -40,7 +44,8 @@ disconnected after 5 seconds, and another waiting client will be able to connect
 That cycle will repeat endlessly, which may be a desirable behavior in order to 
 prevent idle clients from monopolizing the NetRNG server.
 
-##How it works
+How it works
+------------
 
 As a complete system, NetRNG links ``/dev/hwrng`` on one machine, to ``/dev/random``
 on many others, carefully ensuring that each machine receives unique entropy samples,
@@ -57,7 +62,8 @@ them to the kernel entropy pool are left to ``rngd`` from rng-tools, which is
 automatically started and managed by NetRNG.
 
 
-###Server
+Server
+------
 
 The NetRNG server reads from ``/dev/hwrng`` (configurable), dividing up the stream 
 in to non-repeating, non-overlapping samples of a size defined in the configuration
@@ -73,7 +79,8 @@ for example. Clients would be allowed to connect until the server could no longe
 guarantee that entropy rate to each of them.
 
 
-###Client
+Client
+------
 
 The client starts ``rngd`` from rng-tools as a subprocess, then connects to the 
 server and starts requesting entropy samples from it. Then each sample is forwarded
@@ -83,7 +90,8 @@ Then, ``rngd`` validates the quality of the entropy sample before submitting it 
 the Linux or FreeBSD kernel for other programs to use via ``/dev/random``.
 
 
-###Common devices to use as the NetRNG server
+Common devices to use as the NetRNG server
+------------------------------------------
 
 * RaspberryPi
 * Beaglebone
@@ -93,7 +101,8 @@ the Linux or FreeBSD kernel for other programs to use via ``/dev/random``.
 * Any machine with an Entropy Key
 
 
-###Setup
+Setup
+-----
 
 There is very little actual setup required. 
 
@@ -106,34 +115,47 @@ and uploaded to PyPi making it available for installation with pip.
 
 For now, you'll need to manually install it.
 
-####Clone the repo
+Clone the repo
+--------------
+
+.. code-block:: shell
 
     cd /opt/
     git clone https://github.com/infincia/NetRNG.git
 
-####Install Python libraries
+
+Install Python libraries
+------------------------
 
 Create and activate a virtualenv, then install the python libraries into it:
+
+.. code-block:: shell
 
     virtualenv /opt/NetRNG/env
     source /opt/NetRNG/env/bin/activate
     pip install -r /opt/NetRNG/requirements.txt
 
-####Install rng-tools
+Install rng-tools
+-----------------
 
 On some Linux distributions, rng-tools is installed by default. For others you
 will need to install it yourself.
 
 On Ubuntu or Debian you can install it like this:
 
+.. code-block:: shell
+
     sudo apt-get install rng-tools
     
 I have not tested NetRNG on FreeBSD, but rng-tools seems to support FreeBSD so
 it should work. You'll need to install rng-tools from the ports collection.
     
-####Configuration
+Configuration
+-------------
 
 Copy and rename the sample config file on all machines before use:
+
+.. code-block:: shell
 
     cp /opt/NetRNG/netrng.conf.sample /etc/netrng.conf
 
@@ -146,20 +168,26 @@ to each connected client as fast as possible. You can tweak sample_size_bytes if
 needed. This process may be automated in the future.
 
 
-###Run directly for testing
+Run directly for testing
+------------------------
+
+.. code-block:: shell
 
     source /opt/NetRNG/env/bin/activate
     cd /opt/NetRNG
     python netrng.py
 
 
-###Long term use
+Long term use
+-------------
 
 I have written an Upstart script as an example, I will write a systemd script
 soon as well. If someone would like to contribute other types of init scripts
 I will gladly accept a pull request.
 
 If you need the Upstart script, just copy it to the system location and start it.
+
+.. code-block:: shell
 
     cp /opt/NetRNG/netrng.conf.upstart /etc/init/netrng.conf
     service netrng start
