@@ -7,61 +7,35 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		AA87E6C4180F1573001BD376 /* netrng.conf.sample */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = netrng.conf.sample; sourceTree = "<group>"; };
-		AA87E6C5180F1573001BD376 /* netrng.conf.upstart */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = netrng.conf.upstart; sourceTree = "<group>"; };
-		AA87E6C7180F1573001BD376 /* netrng.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = netrng.py; sourceTree = "<group>"; };
-		AA87E6CB180F15A7001BD376 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		AA87E6CC180F15A7001BD376 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
-		AA87E6CD180F15A7001BD376 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		AA87E6CE180F15A7001BD376 /* requirements.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
-		AAE484F5182075EB00B8E5B4 /* check-entropy.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = "check-entropy.py"; sourceTree = "<group>"; };
+		AA13CB871A704FF800A91C7A /* AUTHORS */ = {isa = PBXFileReference; lastKnownFileType = text; path = AUTHORS; sourceTree = "<group>"; };
+		AA13CB881A704FF800A91C7A /* changelog.rst */ = {isa = PBXFileReference; lastKnownFileType = text; path = changelog.rst; sourceTree = "<group>"; };
+		AA13CB891A704FF800A91C7A /* conf */ = {isa = PBXFileReference; lastKnownFileType = folder; path = conf; sourceTree = "<group>"; };
+		AA13CB8A1A704FF800A91C7A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		AA13CB8C1A704FF800A91C7A /* README.rst */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.rst; sourceTree = "<group>"; };
+		AA13CB8E1A704FF800A91C7A /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
+		AA13CB8F1A704FF800A91C7A /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripts; sourceTree = "<group>"; };
+		AA13CB901A704FF800A91C7A /* setup.cfg */ = {isa = PBXFileReference; lastKnownFileType = text; path = setup.cfg; sourceTree = "<group>"; };
+		AA13CB911A704FF800A91C7A /* setup.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = setup.py; sourceTree = "<group>"; };
+		AA13CB921A704FF800A91C7A /* TODO */ = {isa = PBXFileReference; lastKnownFileType = text; path = TODO; sourceTree = "<group>"; };
+		AA13CB941A70511100A91C7A /* netrng.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = netrng.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		AA87E6B9180F155D001BD376 = {
 			isa = PBXGroup;
 			children = (
-				AA87E6CF180F15AB001BD376 /* Other */,
-				AA87E6C8180F157C001BD376 /* Configuration */,
-				AA87E6C9180F158A001BD376 /* Init scripts */,
-				AA87E6CA180F1595001BD376 /* Code */,
+				AA13CB871A704FF800A91C7A /* AUTHORS */,
+				AA13CB881A704FF800A91C7A /* changelog.rst */,
+				AA13CB891A704FF800A91C7A /* conf */,
+				AA13CB8A1A704FF800A91C7A /* LICENSE */,
+				AA13CB941A70511100A91C7A /* netrng.py */,
+				AA13CB8C1A704FF800A91C7A /* README.rst */,
+				AA13CB8E1A704FF800A91C7A /* requirements.txt */,
+				AA13CB8F1A704FF800A91C7A /* scripts */,
+				AA13CB901A704FF800A91C7A /* setup.cfg */,
+				AA13CB911A704FF800A91C7A /* setup.py */,
+				AA13CB921A704FF800A91C7A /* TODO */,
 			);
-			sourceTree = "<group>";
-		};
-		AA87E6C8180F157C001BD376 /* Configuration */ = {
-			isa = PBXGroup;
-			children = (
-				AA87E6C4180F1573001BD376 /* netrng.conf.sample */,
-			);
-			name = Configuration;
-			sourceTree = "<group>";
-		};
-		AA87E6C9180F158A001BD376 /* Init scripts */ = {
-			isa = PBXGroup;
-			children = (
-				AA87E6C5180F1573001BD376 /* netrng.conf.upstart */,
-			);
-			name = "Init scripts";
-			sourceTree = "<group>";
-		};
-		AA87E6CA180F1595001BD376 /* Code */ = {
-			isa = PBXGroup;
-			children = (
-				AAE484F5182075EB00B8E5B4 /* check-entropy.py */,
-				AA87E6C7180F1573001BD376 /* netrng.py */,
-			);
-			name = Code;
-			sourceTree = "<group>";
-		};
-		AA87E6CF180F15AB001BD376 /* Other */ = {
-			isa = PBXGroup;
-			children = (
-				AA87E6CB180F15A7001BD376 /* .gitignore */,
-				AA87E6CC180F15A7001BD376 /* README.md */,
-				AA87E6CD180F15A7001BD376 /* LICENSE */,
-				AA87E6CE180F15A7001BD376 /* requirements.txt */,
-			);
-			name = Other;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
