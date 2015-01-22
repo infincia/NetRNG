@@ -33,6 +33,7 @@ import signal
 import gevent
 import gevent.subprocess
 import gevent.queue
+import gevent.socket
 from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent.coros import RLock
@@ -300,7 +301,7 @@ class NetRNGClient(object):
         while True:
             try:
                 if not server_connected:
-                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    server_socket = gevent.socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     server_socket.connect((self.server_address, self.port))
                     log.debug('NetRNG client: connected to %s:%d', self.server_address, self.port)
                     server_connected = True
