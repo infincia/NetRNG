@@ -2,6 +2,7 @@
 
 import sys
 import os
+import codecs
 from os.path import join, abspath, basename, dirname
 try:
     from setuptools import setup
@@ -16,7 +17,7 @@ if py < (2,7) and py < (3,0):
 
 def read_file(name, *args):
     try:
-        return open(join(dirname(__file__), name),  encoding='utf-8').read(*args)
+        return codecs.open(join(dirname(__file__), name),  encoding='utf-8').read(*args)
     except OSError:
         return ''
 
