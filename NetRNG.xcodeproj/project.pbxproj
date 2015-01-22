@@ -12,12 +12,10 @@
 		AA13CB891A704FF800A91C7A /* conf */ = {isa = PBXFileReference; lastKnownFileType = folder; path = conf; sourceTree = "<group>"; };
 		AA13CB8A1A704FF800A91C7A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		AA13CB8C1A704FF800A91C7A /* README.rst */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.rst; sourceTree = "<group>"; };
-		AA13CB8E1A704FF800A91C7A /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
-		AA13CB8F1A704FF800A91C7A /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripts; sourceTree = "<group>"; };
 		AA13CB901A704FF800A91C7A /* setup.cfg */ = {isa = PBXFileReference; lastKnownFileType = text; path = setup.cfg; sourceTree = "<group>"; };
 		AA13CB911A704FF800A91C7A /* setup.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = setup.py; sourceTree = "<group>"; };
 		AA13CB921A704FF800A91C7A /* TODO */ = {isa = PBXFileReference; lastKnownFileType = text; path = TODO; sourceTree = "<group>"; };
-		AA13CB941A70511100A91C7A /* netrng.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = netrng.py; sourceTree = "<group>"; };
+		AA13CB951A70A86700A91C7A /* netrng */ = {isa = PBXFileReference; lastKnownFileType = folder; path = netrng; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -28,10 +26,8 @@
 				AA13CB881A704FF800A91C7A /* changelog.rst */,
 				AA13CB891A704FF800A91C7A /* conf */,
 				AA13CB8A1A704FF800A91C7A /* LICENSE */,
-				AA13CB941A70511100A91C7A /* netrng.py */,
+				AA13CB951A70A86700A91C7A /* netrng */,
 				AA13CB8C1A704FF800A91C7A /* README.rst */,
-				AA13CB8E1A704FF800A91C7A /* requirements.txt */,
-				AA13CB8F1A704FF800A91C7A /* scripts */,
 				AA13CB901A704FF800A91C7A /* setup.cfg */,
 				AA13CB911A704FF800A91C7A /* setup.py */,
 				AA13CB921A704FF800A91C7A /* TODO */,
