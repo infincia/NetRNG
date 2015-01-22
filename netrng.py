@@ -14,7 +14,7 @@ __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
 __version__ = '0.2a0'
 __license__ = 'MIT'
-__all__ = [NetRNGServer, NetRNGClient]
+__all__ = [Server, Client]
 
 # standard libraries
 import time
@@ -43,7 +43,7 @@ SOCKET_DELIMITER = '--NETRNG-SOCKET-DELIMITER'
 log = logging.getLogger(__name__)
 
 
-class NetRNGServer(object):
+class Server(object):
     '''
         NetRNG server
     
@@ -214,7 +214,7 @@ class NetRNGServer(object):
 
 
 
-class NetRNGClient(object):
+class Client(object):
     '''
         NetRNG client
     

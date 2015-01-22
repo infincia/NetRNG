@@ -86,7 +86,7 @@ if __name__ == '__main__':
         sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
         hwrng_device      = netrng_config.get('Server', 'hwrng_device')
 
-        server = netrng.NetRNGServer(listen_address=listen_address,
+        server = netrng.Server(listen_address=listen_address,
                               port=port,
                               max_clients=max_clients,
                               sample_size_bytes=sample_size_bytes,
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     elif mode == 'client':
         server_address = netrng_config.get('Client', 'server_address')
 
-        client = netrng.NetRNGClient(server_address=server_address, port=port)
+        client = netrng.Client(server_address=server_address, port=port)
         client.start(use_zeroconf=use_zeroconf)
 
     else:
