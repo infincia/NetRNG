@@ -29,9 +29,15 @@ setup(name='netrng',
     author='Stephen Oliver',
     author_email='steve@infincia.com',
     url='http://infincia.github.io/netrng/',
-    scripts=['scripts/netrng-entropycheck.py', 'scripts/netrngd.py', 'scripts/netrng_perftest.py'],
+    entry_points={
+        'console_scripts': [
+            'netrngd = netrng.daemon:main',
+            'netrng-entropycheck = netrng.entropycheck:main',
+            'netrng-perftest = netrng.perftest:main',
+        ]
+    },
     data_files=[('conf',  ['conf/netrng.conf.sample', 'conf/netrng.conf.upstart'])],
-    py_modules=['netrng'],
+    packages=['netrng'],
     license='MIT',
     keywords='rng hwrng entropy random',
     platforms = 'any',
