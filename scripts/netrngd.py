@@ -75,7 +75,7 @@ log.addHandler(mainHandler)
     
 '''
 
-if __name__ == '__main__':
+def main()
     mode = netrng_config.get('Global', 'mode')
     port = netrng_config.getint('Global', 'port')
     use_zeroconf = netrng_config.getboolean('Global', 'zeroconf')
@@ -106,4 +106,7 @@ if __name__ == '__main__':
     else:
         log.error('NetRNG: no mode selected, quitting')
         sys.exit(1)
+
+if __name__ == '__main__':
+    main()
 
