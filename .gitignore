@@ -31,6 +31,8 @@ profile
 # Python
 *.pyc
 env
+dist/*
+*.egg-info
 
 # runtime
 logs
