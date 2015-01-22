@@ -126,18 +126,18 @@ class NetRNGServer(object):
         # lock to prevent multiple clients from getting the same random samples
         self.rng_lock = RLock()
 
-        self.zeroconf = Zeroconf()
+        self.zeroconf_controller = Zeroconf()
 
 
     def broadcast_service(self):
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
         log.debug('NetRNG server: registering service with Bonjour: %s', info)
-        self.zeroconf.registerService(info)
+        self.zeroconf_controller.registerService(info)
 
     def unregister_service(self):
         log.debug('NetRNG server: unregistering all bonjour services')
-        self.zeroconf.unregisterAllServices()
+        self.zeroconf_controller.unregisterAllServices()
 
     def serve(self, sock, address):
         '''
@@ -269,7 +269,7 @@ class NetRNGClient(object):
         # client socket for connecting to server
         self.sock = None
     
-        self.zeroconf = Zeroconf()
+        self.zeroconf_controller = Zeroconf()
 
 
 
