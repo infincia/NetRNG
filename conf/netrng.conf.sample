@@ -2,6 +2,7 @@
 mode = server
 port = 8989
 debug = no
+zeroconf = no
 
 [Server]
 sample_size_bytes = 2048
