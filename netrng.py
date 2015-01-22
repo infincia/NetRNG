@@ -12,7 +12,7 @@ from __future__ import division
 
 __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
-__version__ = '0.2-prerelease'
+__version__ = '0.2a0'
 __license__ = 'MIT'
 
 # monkey patch for gevent
@@ -47,9 +47,6 @@ from zeroconf import ServiceBrowser, Zeroconf, ServiceInfo
 
 netrng_config = ConfigParser.ConfigParser()
 netrng_config.read('/etc/netrng.conf')
-
-# whether we're in client or server mode
-NETRNG_MODE = netrng_config.get('Global', 'mode')
 
 # logging level
 DEBUG = netrng_config.getboolean('Global', 'debug')
@@ -87,30 +84,44 @@ class NetRNGServer(object):
     
     
     
-    def __init__(self):
-
-        # TCP port to listen on
-        self.port = netrng_config.getint('Global', 'port')
-
-        # How much random data to request from the device for each client push
-        self.sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
+    def __init__(self,
+                 listen_address=None,
+                 port=None,
+                 max_clients=None,
+                 sample_size_bytes=None,
+                 hwrng_device=None):
+        log.debug('NetRNG server: initializing')
 
         # Listen address used by the server
-        self.listen_address = netrng_config.get('Server', 'listen_address')
+        self.listen_address = listen_address
 
-        # Source device to use for random data, should be something fast and
-        # high quality, DON'T set this to /dev/random
-        self.hwrng_device = netrng_config.get('Server', 'hwrng_device')
+        # TCP port to listen on
+        self.port = port
+
+
 
         # Maximum number of clients to accept, this prevents your HWRNG from being
         # overloaded, starving clients. This requires testing and depends entirely on
         # how fast your HWRNG can be read. A device that can spit out 1mbps (100KB/s) could
         # give 100 clients 1KB/s, but a device that can only generate 128bps may only
         # be able to serve 1 client slowly
-        self.max_clients = netrng_config.getint('Server', 'max_clients')
+        self.max_clients = max_clients
+
+        # How much random data to request from the device for each client push
+        self.sample_size_bytes = sample_size_bytes
+
+
+
+        # Source device to use for random data, should be something fast and
+        # high quality, DON'T set this to /dev/random
+        self.hwrng_device = hwrng_device
 
         # open the hwrng for reading later during client requests
         self.hwrng = open(self.hwrng_device, 'r')
+
+
+
+
         
         # lock to prevent multiple clients from getting the same random samples
         self.rng_lock = RLock()
@@ -193,7 +204,8 @@ class NetRNGServer(object):
         received_entropy = ""
         stop_time = time.time() + calibration_period
         while time.time() < stop_time:
-            received_entropy += self.hwrng.read(self.sample_size_bytes)
+            with self.rng_lock:
+                received_entropy += self.hwrng.read(self.sample_size_bytes)
         received_entropy_size = len(received_entropy)
         received_entropy_per_second = received_entropy_size / calibration_period
         log.debug('NetRNG server: completed entropy source performance calibration')
@@ -236,16 +248,16 @@ class NetRNGClient(object):
         NetRNG client
     
     '''
-    def __init__(self):
-    
-        # TCP port to connect to on the server
-        self.port = netrng_config.getint('Global', 'port')
+    def __init__(self, server_address=None, port=None):
+        log.debug('NetRNG client: initializing')
 
         # Address of the server to connect to
-        self.server_address = netrng_config.get('Client', 'server_address')
+        self.server_address = server_address
+    
+        # TCP port to connect to on the server
+        self.port = port
 
-        # Connection state
-        self.connected = False
+
 
         # client socket for connecting to server
         self.rngd = gevent.subprocess.Popen(['rngd','-f','-r','/dev/stdin'],
@@ -272,13 +284,18 @@ class NetRNGClient(object):
 
         '''
         log.debug('NetRNG client: starting rngd queue greenlet')
-        while True:
-            sample = self.rngd_queue.get()
-            self.rngd.stdin.write(sample)
-            self.rngd.stdin.flush()
-            gevent.sleep()
+        try:
+            while True:
+                sample = self.rngd_queue.get()
+                self.rngd.stdin.write(sample)
+                self.rngd.stdin.flush()
+                gevent.sleep()
+        except gevent.GreenletExit as exit:
+            log.debug('NetRNG client: rngd queue greenlet exiting due to graceful quit')
+        except OSError:
+            return
 
-
+    
     def stream(self):
         '''
             Opens a connection to the server, configures the sample size to
@@ -289,14 +306,21 @@ class NetRNGClient(object):
             starting/stopping/configuring it at the right times
 
         '''
-        log.debug('NetRNG client: initializing')
+        log.debug('NetRNG client: starting stream greenlet')
+
+        # client socket for connecting to server
+        server_socket = None
+
+        # Connection state
+        server_connected = False
+
         while True:
             try:
-                if not self.connected:
-                    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    self.sock.connect((self.server_address, self.port))
+                if not server_connected:
+                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    server_socket.connect((self.server_address, self.port))
                     log.debug('NetRNG client: connected to %s:%d', self.server_address, self.port)
-                    self.connected = True
+                    server_connected = True
 
 
 
@@ -304,13 +328,13 @@ class NetRNGClient(object):
                     # send a keepalive to the server
                     log.debug('NetRNG client: sending heartbeat message')
                     requestmsg = msgpack.packb({'get': 'heartbeat'})
-                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    server_socket.sendall(requestmsg + SOCKET_DELIMITER)
                     log.debug('NetRNG client: heartbeat request sent')
                 else:
                     # request a new sample
                     log.debug('NetRNG client: requesting sample')
                     requestmsg = msgpack.packb({'get': 'sample'})
-                    self.sock.sendall(requestmsg + SOCKET_DELIMITER)
+                    server_socket.sendall(requestmsg + SOCKET_DELIMITER)
                     log.debug('NetRNG client: sample request sent')
 
 
@@ -319,7 +343,7 @@ class NetRNGClient(object):
                 responsemsg = ""
                 with Timeout(2, gevent.Timeout):
                     while True:
-                        data = self.sock.recv(1024)
+                        data = server_socket.recv(1024)
                         responsemsg = responsemsg + data
                         log.debug('NetRNG client: receive cycle')
                         if SOCKET_DELIMITER in responsemsg:
@@ -343,23 +367,28 @@ class NetRNGClient(object):
 
             except socket.error as socket_exception:
                 log.debug('NetRNG client: server unavailable, reconnecting in 10 seconds')
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
                 gevent.sleep(10)
             except gevent.Timeout as timeout:
                 log.debug('NetRNG client: server socket timeout')
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
                 gevent.sleep(1)
             except KeyboardInterrupt as keyboard_exception:
                 log.debug('NetRNG client: exiting due to keyboard interrupt')
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
+                break
+            except gevent.GreenletExit as exit:
+                log.debug('NetRNG client: stream greenlet exiting due to graceful quit')
+                server_connected = False
+                server_socket.close()
                 break
             except Exception as unknown_exception:
                 log.exception('NetRNG client: unknown exception %s', unknown_exception)
-                self.connected = False
-                self.sock.close()
+                server_connected = False
+                server_socket.close()
         sys.exit(0)
 
 
@@ -377,6 +406,7 @@ class NetRNGClient(object):
             gevent.joinall(greenlets)
         except KeyboardInterrupt as e:
             log.debug('NetRNG client: exiting due to keyboard interrupt')
+        finally:
             gevent.killall(greenlets)
             sys.exit(0)
 
@@ -388,17 +418,34 @@ class NetRNGClient(object):
 '''
 
 if __name__ == '__main__':
-    if NETRNG_MODE == 'server':
-        server = NetRNGServer()
+    mode = netrng_config.get('Global', 'mode')
+    port = netrng_config.getint('Global', 'port')
+
+    if mode == 'server':
+        listen_address    = netrng_config.get('Server', 'listen_address')
+        max_clients       = netrng_config.getint('Server', 'max_clients')
+        sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
+        hwrng_device      = netrng_config.get('Server', 'hwrng_device')
+
+        server = NetRNGServer(listen_address=listen_address,
+                              port=port,
+                              max_clients=max_clients,
+                              sample_size_bytes=sample_size_bytes,
+                              hwrng_device=hwrng_device)
+
         try:
             server.start()
             server.broadcast_service()
         finally:
             server.unregister_service()
             server.stop()
-    elif NETRNG_MODE == 'client':
-        client = NetRNGClient()
+
+    elif mode == 'client':
+        server_address = netrng_config.get('Client', 'server_address')
+
+        client = NetRNGClient(server_address=server_address, port=port)
         client.start()
+
     else:
         log.error('NetRNG: no mode selected, quitting')
         sys.exit(1)
