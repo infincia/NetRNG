@@ -49,7 +49,8 @@ config_defaults = dict()
 
 global_defaults = {'mode': 'server',
                    'port': 8989,
-                   'debug': False}
+                   'debug': False,
+                   'zeroconf': False}
 
 server_defaults = {'sample_size_bytes': 2048,
                    'listen_address': '0.0.0.0',
