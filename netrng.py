@@ -25,7 +25,6 @@ import os
 import logging
 import ConfigParser
 import msgpack
-import socket
 import errno
 import signal
 
