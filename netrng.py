@@ -58,7 +58,7 @@ class NetRNGServer(object):
                  max_clients=None,
                  sample_size_bytes=None,
                  hwrng_device=None):
-        log.debug('NetRNG server: initializing')
+        log.info('NetRNG server: initializing')
 
         # Listen address used by the server
         self.listen_address = listen_address
@@ -100,11 +100,11 @@ class NetRNGServer(object):
     def broadcast_service(self):
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
-        log.debug('NetRNG server: registering service with Bonjour: %s', info)
+        log.info('NetRNG server: registering service with Bonjour: %s', info)
         self.zeroconf_controller.registerService(info)
 
     def unregister_service(self):
-        log.debug('NetRNG server: unregistering all bonjour services')
+        log.info('NetRNG server: unregistering all bonjour services')
         self.zeroconf_controller.unregisterAllServices()
 
     def serve(self, sock, address):
@@ -167,7 +167,7 @@ class NetRNGServer(object):
             how many clients can be promised `sample_size_bytes` per second
 
         '''
-        log.debug('NetRNG server: starting entropy source performance calibration')
+        log.info('NetRNG server: starting entropy source performance calibration')
         calibration_period = 15 # seconds
         received_entropy = ""
         stop_time = time.time() + calibration_period
@@ -176,8 +176,7 @@ class NetRNGServer(object):
                 received_entropy += self.hwrng.read(self.sample_size_bytes)
         received_entropy_size = len(received_entropy)
         received_entropy_per_second = received_entropy_size / calibration_period
-        log.debug('NetRNG server: completed entropy source performance calibration')
-        log.debug('NetRNG server: entropy source can provide %.2f bytes per second', received_entropy_per_second)
+        log.info('NetRNG server: entropy source can provide %.2f bytes per second', received_entropy_per_second)
 
     def start(self, use_zeroconf=False):
         '''
@@ -187,7 +186,7 @@ class NetRNGServer(object):
         '''
         self.pool = Pool(self.max_clients)
         self.server = StreamServer((self.listen_address, self.port), self.serve, spawn=self.pool)
-        log.debug('NetRNG server: serving up to %d connections on %s:%d)', self.max_clients, self.listen_address, self.port)
+        log.info('NetRNG server: serving up to %d connections on %s:%d)', self.max_clients, self.listen_address, self.port)
         try:
             self.server.start()
             if use_zeroconf:
@@ -221,7 +220,7 @@ class NetRNGClient(object):
     
     '''
     def __init__(self, server_address=None, port=None):
-        log.debug('NetRNG client: initializing')
+        log.info('NetRNG client: initializing')
 
         # Address of the server to connect to
         self.server_address = server_address
