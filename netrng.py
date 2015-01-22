@@ -211,7 +211,7 @@ class NetRNGServer(object):
         log.debug('NetRNG server: completed entropy source performance calibration')
         log.debug('NetRNG server: entropy source can provide %.2f bytes per second', received_entropy_per_second)
 
-    def start(self):
+    def start(self, use_zeroconf=False):
         '''
             Server starts listening on a TCP socket and spawns a greenlet for each
             new connection. Blocks caller.
@@ -222,19 +222,23 @@ class NetRNGServer(object):
         log.debug('NetRNG server: serving up to %d connections on %s:%d)', self.max_clients, self.listen_address, self.port)
         try:
             self.server.start()
+            if use_zeroconf:
+                self.broadcast_service()
             gevent.wait()
         except KeyboardInterrupt as e:
             log.debug('NetRNG server: exiting due to keyboard interrupt')
             sys.exit(0)
 
 
-    def stop(self):
+    def stop(self, use_zeroconf=False):
         '''
             Server stops listening on the TCP socket, stops accepting new connections
             and finally kills spawned connection handlers
 
         '''
         log.debug('NetRNG server: stopping server and killing existing client connections')
+        if use_zeroconf:
+            self.unregister_service()
         self.server.stop()
 
 
@@ -392,7 +396,7 @@ class NetRNGClient(object):
         sys.exit(0)
 
 
-    def start(self):
+    def start(self, use_zeroconf=False):
         '''
             Client spawns a greenlet for the rngd handler and the network stream
             connection, then joins and waits for them to block the caller
@@ -435,17 +439,15 @@ if __name__ == '__main__':
                               hwrng_device=hwrng_device)
 
         try:
-            server.start()
-            server.broadcast_service()
+            server.start(use_zeroconf=use_zeroconf)
         finally:
-            server.unregister_service()
-            server.stop()
+            server.stop(use_zeroconf=use_zeroconf)
 
     elif mode == 'client':
         server_address = netrng_config.get('Client', 'server_address')
 
         client = NetRNGClient(server_address=server_address, port=port)
-        client.start()
+        client.start(use_zeroconf=use_zeroconf)
 
     else:
         log.error('NetRNG: no mode selected, quitting')
