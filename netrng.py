@@ -15,9 +15,6 @@ __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
 __version__ = '0.2a0'
 __license__ = 'MIT'
 
-# monkey patch for gevent
-from gevent import monkey; monkey.patch_all()
-
 # standard libraries
 import time
 import sys
