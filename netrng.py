@@ -420,6 +420,7 @@ class NetRNGClient(object):
 if __name__ == '__main__':
     mode = netrng_config.get('Global', 'mode')
     port = netrng_config.getint('Global', 'port')
+    use_zeroconf = netrng_config.getboolean('Global', 'zeroconf')
 
     if mode == 'server':
         listen_address    = netrng_config.get('Server', 'listen_address')
