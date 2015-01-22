@@ -45,8 +45,24 @@ from gevent import Timeout
     Config
 
 '''
+config_defaults = dict()
 
-netrng_config = ConfigParser.ConfigParser()
+global_defaults = {'mode': 'server',
+                   'port': 8989,
+                   'debug': False}
+
+server_defaults = {'sample_size_bytes': 2048,
+                   'listen_address': '0.0.0.0',
+                   'hwrng_device': '/dev/hwrng',
+                   'max_clients': 2}
+
+client_defaults = {'server_address': '192.168.1.2'}
+
+config_defaults.update(global_defaults)
+config_defaults.update(server_defaults)
+config_defaults.update(client_defaults)
+
+netrng_config = ConfigParser.ConfigParser(defaults=config_defaults)
 netrng_config.read('/etc/netrng.conf')
 
 # logging level
