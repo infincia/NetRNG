@@ -14,7 +14,7 @@ __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
 __version__ = '0.2a0'
 __license__ = 'MIT'
-__all__ = [Server, Client]
+__all__ = ['Server', 'Client']
 
 # standard libraries
 import time
