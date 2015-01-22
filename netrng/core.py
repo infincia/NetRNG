@@ -1,6 +1,4 @@
-from __future__ import division
-
-""" NetRNG 
+""" NetRNG
 
     A network connected random number generator
 
@@ -9,6 +7,8 @@ from __future__ import division
     See LICENSE file for license information
 
 """
+
+from __future__ import absolute_import, print_function, division
 
 __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'

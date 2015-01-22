@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """ NetRNG Daemon
 
     A network connected random number generator daemon
@@ -7,6 +9,8 @@
     See LICENSE file for license information
 
 """
+
+from __future__ import absolute_import, print_function, division
 
 __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
@@ -21,7 +25,7 @@ import logging
 import ConfigParser
 
 # local modules
-import netrng
+import netrng.core
 
 '''
     Config
@@ -75,7 +79,7 @@ log.addHandler(mainHandler)
     
 '''
 
-def main()
+def main():
     mode = netrng_config.get('Global', 'mode')
     port = netrng_config.getint('Global', 'port')
     use_zeroconf = netrng_config.getboolean('Global', 'zeroconf')
@@ -86,7 +90,7 @@ def main()
         sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
         hwrng_device      = netrng_config.get('Server', 'hwrng_device')
 
-        server = netrng.Server(listen_address=listen_address,
+        server = netrng.core.Server(listen_address=listen_address,
                               port=port,
                               max_clients=max_clients,
                               sample_size_bytes=sample_size_bytes,
@@ -100,7 +104,7 @@ def main()
     elif mode == 'client':
         server_address = netrng_config.get('Client', 'server_address')
 
-        client = netrng.Client(server_address=server_address, port=port)
+        client = netrng.core.Client(server_address=server_address, port=port)
         client.start(use_zeroconf=use_zeroconf)
 
     else:
