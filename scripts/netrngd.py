@@ -1,0 +1,109 @@
+""" NetRNG Daemon
+
+    A network connected random number generator daemon
+
+    Copyright 2014 Infincia LLC
+    
+    See LICENSE file for license information
+
+"""
+
+__author__ = 'Stephen Oliver'
+__maintainer__ = 'Stephen Oliver <steve@infincia.com>'
+__version__ = '0.2a0'
+__license__ = 'MIT'
+
+# standard libraries
+import time
+import sys
+import os
+import logging
+import ConfigParser
+
+# local modules
+import netrng
+
+'''
+    Config
+
+'''
+config_defaults = dict()
+
+global_defaults = {'mode': 'server',
+                   'port': 8989,
+                   'debug': False,
+                   'zeroconf': False}
+
+server_defaults = {'sample_size_bytes': 2048,
+                   'listen_address': '0.0.0.0',
+                   'hwrng_device': '/dev/hwrng',
+                   'max_clients': 2}
+
+client_defaults = {'server_address': '192.168.1.2'}
+
+config_defaults.update(global_defaults)
+config_defaults.update(server_defaults)
+config_defaults.update(client_defaults)
+
+netrng_config = ConfigParser.ConfigParser(defaults=config_defaults)
+netrng_config.read('/etc/netrng.conf')
+
+# logging level
+DEBUG = netrng_config.getboolean('Global', 'debug')
+
+
+
+''' 
+    Logging setup
+    
+'''
+
+log = logging.getLogger(__name__)
+if DEBUG:
+    log.setLevel(logging.DEBUG)
+else:
+    log.setLevel(logging.INFO)
+mainHandler = logging.StreamHandler()
+mainHandler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+log.addHandler(mainHandler)
+
+
+
+
+'''
+    Select correct mode based on configuration and start
+    
+'''
+
+if __name__ == '__main__':
+    mode = netrng_config.get('Global', 'mode')
+    port = netrng_config.getint('Global', 'port')
+    use_zeroconf = netrng_config.getboolean('Global', 'zeroconf')
+
+    if mode == 'server':
+        listen_address    = netrng_config.get('Server', 'listen_address')
+        max_clients       = netrng_config.getint('Server', 'max_clients')
+        sample_size_bytes = netrng_config.getint('Server', 'sample_size_bytes')
+        hwrng_device      = netrng_config.get('Server', 'hwrng_device')
+
+        server = netrng.NetRNGServer(listen_address=listen_address,
+                              port=port,
+                              max_clients=max_clients,
+                              sample_size_bytes=sample_size_bytes,
+                              hwrng_device=hwrng_device)
+
+        try:
+            server.start(use_zeroconf=use_zeroconf)
+        finally:
+            server.stop(use_zeroconf=use_zeroconf)
+
+    elif mode == 'client':
+        server_address = netrng_config.get('Client', 'server_address')
+
+        client = netrng.NetRNGClient(server_address=server_address, port=port)
+        client.start(use_zeroconf=use_zeroconf)
+
+    else:
+        log.error('NetRNG: no mode selected, quitting')
+        sys.exit(1)
+
