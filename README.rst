@@ -28,22 +28,6 @@ So I wrote NetRNG. It's simple code, easy to maintain, easy to deploy, and with
 the exception of some network protocol issues before v0.1, it works quite 
 well.
 
-Current state of the code at v0.1 
----------------------------------
-
-Reconnection seems to be working when either the server or client restarts, or 
-fails to properly close the socket connection. 
-
-It relies on a simple activity timeout on both sides, which will cause a disconnection 
-even if the other side hasn't actually disappeared but is simply idle. 
-
-If the server is configured to allow only two clients to connect, and two are 
-connected but one of them isn't actively requesting entropy, that client will be 
-disconnected after 5 seconds, and another waiting client will be able to connect. 
-
-That cycle will repeat endlessly, which may be a desirable behavior in order to 
-prevent idle clients from monopolizing the NetRNG server.
-
 How it works
 ------------
 
@@ -104,36 +88,53 @@ Common devices to use as the NetRNG server
 Setup
 -----
 
-There is very little actual setup required. 
+There is very little actual configuration required for NetRNG, but until it is
+packaged and uploaded to PyPi you'll need to manually clone the repository and
+package it for installation.
 
-No paths in the code are hardcoded, feel free to put the code wherever you
-like, but ``/opt/NetRNG``is the default so make sure to change the init/upstart 
-script to match if you put the code somewhere else.
+Feel free to install the generated package wherever you like, but ``/opt/netrng``
+is the default virtualenv, so make sure to change the init/upstart script if you
+install the module somewhere else.
 
-In the near future NetRNG will probably be provided via native deb/rpm packages
-and uploaded to PyPi making it available for installation with pip.
-
-For now, you'll need to manually install it.
+I don't advise installing the package in the main system python package directory,
+use a virtualenv to make things easier :)
 
 Clone the repo
 --------------
 
 .. code-block:: shell
 
-    cd /opt/
+    cd ~/
     git clone https://github.com/infincia/NetRNG.git
 
+Create virtualenv
+-----------------
 
-Install Python libraries
-------------------------
-
-Create and activate a virtualenv, then install the python libraries into it:
+Create and activate a virtualenv for NetRNG:
 
 .. code-block:: shell
 
-    virtualenv /opt/NetRNG/env
-    source /opt/NetRNG/env/bin/activate
-    pip install -r /opt/NetRNG/requirements.txt
+    virtualenv /opt/NetRNG
+    source /opt/NetRNG/bin/activate
+
+Install required build libraries
+--------------------------------
+
+The `wheel` module is needed to build NetRNG:
+
+.. code-block:: shell
+
+    pip install wheel
+
+Build and install NetRNG
+-----------------------------
+
+.. code-block:: shell
+
+    cd ~/NetRNG
+    python setup.py bdist_wheel
+    pip install dist/netrng*.whl
+
 
 Install rng-tools
 -----------------
@@ -157,7 +158,7 @@ Copy and rename the sample config file on all machines before use:
 
 .. code-block:: shell
 
-    cp /opt/NetRNG/netrng.conf.sample /etc/netrng.conf
+    cp /opt/NetRNG/conf/netrng.conf.sample /etc/netrng.conf
 
 The NetRNG server requires very little configuration on most systems, but the 
 client requires setting the right server address and setting the mode to 'client'. 
@@ -168,14 +169,16 @@ to each connected client as fast as possible. You can tweak sample_size_bytes if
 needed. This process may be automated in the future.
 
 
-Run directly for testing
-------------------------
+Run for testing
+---------------
+
+Since the compiled daemon script is available on your path while the virtualenv
+is activated, you can run it directly:
 
 .. code-block:: shell
 
-    source /opt/NetRNG/env/bin/activate
-    cd /opt/NetRNG
-    python netrng.py
+    source /opt/NetRNG/bin/activate
+    netrngd
 
 
 Long term use
@@ -189,7 +192,7 @@ If you need the Upstart script, just copy it to the system location and start it
 
 .. code-block:: shell
 
-    cp /opt/NetRNG/netrng.conf.upstart /etc/init/netrng.conf
+    cp /opt/NetRNG/conf/netrng.conf.upstart /etc/init/netrng.conf
     service netrng start
     
 Then Upstart will keep it running for you all the time.
