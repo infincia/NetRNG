@@ -92,12 +92,22 @@ There is very little actual configuration required for NetRNG, but until it is
 packaged and uploaded to PyPi you'll need to manually clone the repository and
 package it for installation.
 
-Feel free to install the generated package wherever you like, but ``/opt/netrng``
-is the default virtualenv, so make sure to change the init/upstart script if you
-install the module somewhere else.
+Feel free to install the generated package wherever you like, but ``/opt/NetRNG``
+is the default where the bundled init/upstart script are pointed, so if you
+install the module somewhere else make sure to change them once they're copied
+to /etc/.
 
 I don't advise installing the package in the main system python package directory,
 use a virtualenv to make things easier :)
+
+Note: these instructions are written for Debian/Ubuntu and derivatives, you'll
+need to determine the equivalent native package names for build-essential and
+python-dev.
+
+The virtualenv activation is repeated on purpose in certain steps to ensure that
+someone who isn't following the steps sequentially won't accidentally install
+python modules in the global system (not being root helps here, but just in
+case...).
 
 Clone the repo
 --------------
@@ -110,20 +120,30 @@ Clone the repo
 Create virtualenv
 -----------------
 
-Create and activate a virtualenv for NetRNG:
+Create a virtualenv for NetRNG:
 
 .. code-block:: shell
 
     virtualenv /opt/NetRNG
-    source /opt/NetRNG/bin/activate
 
-Install required build libraries
---------------------------------
+Setup build environment
+-----------------------
 
-The `wheel` module is needed to build NetRNG:
+Some NetRNG dependencies require building python C extensions, so we need to
+install a compiler and python development headers so they'll build properly
+during installation of the NetRNG package:
 
 .. code-block:: shell
 
+    apt-get install build-essential
+    apt-get install python-dev
+
+The `wheel` module is also needed to build NetRNG, so we install it in to the
+virtualenv:
+
+.. code-block:: shell
+
+    source /opt/NetRNG/bin/activate
     pip install wheel
 
 Build and install NetRNG
@@ -132,6 +152,7 @@ Build and install NetRNG
 .. code-block:: shell
 
     cd ~/NetRNG
+    source /opt/NetRNG/bin/activate
     python setup.py bdist_wheel
     pip install dist/netrng*.whl
 
@@ -173,7 +194,8 @@ Run for testing
 ---------------
 
 Since the compiled daemon script is available on your path while the virtualenv
-is activated, you can run it directly:
+is activated, you can run it directly after the config file is determined to be
+correct:
 
 .. code-block:: shell
 
