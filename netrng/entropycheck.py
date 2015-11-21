@@ -14,7 +14,7 @@ from __future__ import absolute_import, print_function, division
 
 __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
-__version__ = '0.2a0'
+__version__ = '0.2a1'
 __license__ = 'MIT'
 
 # standard libraries

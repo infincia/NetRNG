@@ -23,7 +23,7 @@ def read_file(name, *args):
 
 
 setup(name='netrng',
-    version='0.2a0',
+    version='0.2a1',
     description='A network entropy distribution system',
     long_description=read_file('README.rst'),
     author='Stephen Oliver',
