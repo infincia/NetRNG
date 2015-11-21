@@ -23,7 +23,7 @@ import os
 import logging
 import time
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('netrng')
 log.setLevel(logging.INFO)
 mainHandler = logging.StreamHandler()
 mainHandler.setFormatter(logging.Formatter('%(levelname)s %(asctime)s - %(module)s - %(funcName)s: %(message)s'))

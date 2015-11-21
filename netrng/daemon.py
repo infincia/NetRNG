@@ -62,7 +62,7 @@ DEBUG = netrng_config.getboolean('Global', 'debug')
     
 '''
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('netrng')
 if DEBUG:
     log.setLevel(logging.DEBUG)
 else:

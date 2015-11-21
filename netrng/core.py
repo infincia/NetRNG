@@ -40,7 +40,7 @@ from zeroconf import ServiceBrowser, Zeroconf, ServiceInfo
 SOCKET_DELIMITER = '--NETRNG-SOCKET-DELIMITER'
 
 # library logger
-log = logging.getLogger(__name__)
+log = logging.getLogger('netrng')
 
 
 class Server(object):

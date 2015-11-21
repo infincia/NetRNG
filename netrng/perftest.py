@@ -24,7 +24,7 @@ import logging
 import netrng.core
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('netrng')
 log.setLevel(logging.DEBUG)
 mainHandler = logging.StreamHandler()
 mainHandler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
