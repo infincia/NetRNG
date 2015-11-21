@@ -206,16 +206,22 @@ correct:
 Long term use
 -------------
 
-I have written both an Upstart and systemd script
+I have written both Upstart and systemd scripts for netrngd.
 
 If someone would like to contribute other types of init scripts I will gladly 
 accept a pull request.
 
-If you need the Upstart script, just copy it to the system location and start it.
+To use the the systemd script:
+
+.. code-block:: shell
+
+    cp /opt/NetRNG/conf/netrng.service /etc/systemd/system/
+    systemctl daemon-reload
+    systemctl start netrng
+    
+To use the Upstart script:
 
 .. code-block:: shell
 
     cp /opt/NetRNG/conf/netrng.conf.upstart /etc/init/netrng.conf
     service netrng start
-    
-Then Upstart will keep it running for you all the time.
