@@ -1,0 +1,13 @@
+[Unit]
+Description=NetRNG Daemon
+After=network.target
+
+[Service]
+ExecStart=/opt/NetRNG/bin/netrngd
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
+Alias=netrng.service

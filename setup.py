@@ -36,7 +36,7 @@ setup(name='netrng',
             'netrng-perftest = netrng.perftest:main',
         ]
     },
-    data_files=[('conf',  ['conf/netrng.conf.sample', 'conf/netrng.conf.upstart'])],
+    data_files=[('conf',  ['conf/netrng.conf.sample', 'conf/netrng.conf.upstart', 'conf/netrng.service'])],
     packages=['netrng'],
     license='MIT',
     keywords='rng hwrng entropy random',

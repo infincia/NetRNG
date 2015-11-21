@@ -206,9 +206,10 @@ correct:
 Long term use
 -------------
 
-I have written an Upstart script as an example, I will write a systemd script
-soon as well. If someone would like to contribute other types of init scripts
-I will gladly accept a pull request.
+I have written both an Upstart and systemd script
+
+If someone would like to contribute other types of init scripts I will gladly 
+accept a pull request.
 
 If you need the Upstart script, just copy it to the system location and start it.
 
