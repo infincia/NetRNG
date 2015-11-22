@@ -2,6 +2,9 @@
 NetRNG
 ============================
 
+.. image:: https://travis-ci.org/infincia/NetRNG.svg?branch=master
+    :target: https://travis-ci.org/infincia/NetRNG
+
 **Note: The master branch of this code is alpha quality but usable**.
 
 NetRNG is effectively a network connected hardware random number generator. 
