@@ -94,12 +94,13 @@ def main():
                               port=port,
                               max_clients=max_clients,
                               sample_size_bytes=sample_size_bytes,
-                              hwrng_device=hwrng_device)
+                              hwrng_device=hwrng_device,
+                              use_zeroconf=use_zeroconf)
 
         try:
-            server.start(use_zeroconf=use_zeroconf)
+            server.start()
         finally:
-            server.stop(use_zeroconf=use_zeroconf)
+            server.stop()
 
     elif mode == 'client':
         server_address = netrng_config.get('Client', 'server_address')
