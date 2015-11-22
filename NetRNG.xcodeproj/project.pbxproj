@@ -16,12 +16,15 @@
 		AA13CB911A704FF800A91C7A /* setup.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = setup.py; sourceTree = "<group>"; };
 		AA13CB921A704FF800A91C7A /* TODO */ = {isa = PBXFileReference; lastKnownFileType = text; path = TODO; sourceTree = "<group>"; };
 		AA13CB951A70A86700A91C7A /* netrng */ = {isa = PBXFileReference; lastKnownFileType = folder; path = netrng; sourceTree = "<group>"; };
+		AABFE39B1C01770D00A5824E /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
+		AABFE39C1C017E2000A5824E /* test */ = {isa = PBXFileReference; lastKnownFileType = folder; path = test; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		AA87E6B9180F155D001BD376 = {
 			isa = PBXGroup;
 			children = (
+				AABFE39B1C01770D00A5824E /* .travis.yml */,
 				AA13CB871A704FF800A91C7A /* AUTHORS */,
 				AA13CB881A704FF800A91C7A /* changelog.rst */,
 				AA13CB891A704FF800A91C7A /* conf */,
@@ -31,6 +34,7 @@
 				AA13CB901A704FF800A91C7A /* setup.cfg */,
 				AA13CB911A704FF800A91C7A /* setup.py */,
 				AA13CB921A704FF800A91C7A /* TODO */,
+				AABFE39C1C017E2000A5824E /* test */,
 			);
 			sourceTree = "<group>";
 		};
