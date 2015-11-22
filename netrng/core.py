@@ -245,14 +245,25 @@ class Client(object):
         
         self.use_zeroconf = use_zeroconf
     
-        self.zeroconf_controller = Zeroconf()
-
-
+        if self.use_zeroconf:
+            self.zeroconf_controller = Zeroconf()
+            self.browser = ServiceBrowser(self.zeroconf, "_netrng._tcp.local.", self)
 
 
         # queue for pushing received samples to the rngd subprocess as needed
         self.rngd_queue = gevent.queue.Queue(maxsize=10)
 
+    def remove_service(self, zeroconf, type, name):
+        self.server_address = None
+        self.port = None
+        log.debug('Service %s removed' % (name,))
+
+    def add_service(self, zeroconf, type, name):
+        info = zeroconf.get_service_info(type, name)
+        self.server_address = info['address']
+        self.port = info['port']
+        log.debug('Service %s added, service info: %s' % (name, info))
+        
 
     def rngd_handler(self):
         '''
@@ -292,6 +303,10 @@ class Client(object):
 
         while True:
             try:
+                if not self.server_address or not self.port:
+                    gevent.sleep(1)
+                    continue
+                    
                 if not server_connected:
                     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     server_socket.connect((self.server_address, self.port))
