@@ -104,8 +104,8 @@ def main():
     elif mode == 'client':
         server_address = netrng_config.get('Client', 'server_address')
 
-        client = netrng.core.Client(server_address=server_address, port=port)
-        client.start(use_zeroconf=use_zeroconf)
+        client = netrng.core.Client(server_address=server_address, port=port, use_zeroconf=use_zeroconf)
+        client.start()
 
     else:
         log.error('NetRNG: no mode selected, quitting')

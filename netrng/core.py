@@ -57,7 +57,8 @@ class Server(object):
                  port=None,
                  max_clients=None,
                  sample_size_bytes=None,
-                 hwrng_device=None):
+                 hwrng_device=None,
+                 use_zeroconf=False):
         log.info('NetRNG server: initializing')
 
         # Listen address used by the server
@@ -93,6 +94,8 @@ class Server(object):
         
         # lock to prevent multiple clients from getting the same random samples
         self.rng_lock = RLock()
+        
+        self.use_zeroconf = use_zeroconf
 
         self.zeroconf_controller = Zeroconf()
 
@@ -178,7 +181,7 @@ class Server(object):
         received_entropy_per_second = received_entropy_size / calibration_period
         log.info('NetRNG server: entropy source can provide %.2f bytes per second', received_entropy_per_second)
 
-    def start(self, use_zeroconf=False):
+    def start(self):
         '''
             Server starts listening on a TCP socket and spawns a greenlet for each
             new connection. Blocks caller.
@@ -189,7 +192,7 @@ class Server(object):
         log.info('NetRNG server: serving up to %d connections on %s:%d)', self.max_clients, self.listen_address, self.port)
         try:
             self.server.start()
-            if use_zeroconf:
+            if self.use_zeroconf:
                 self.broadcast_service()
             gevent.wait()
         except KeyboardInterrupt as e:
@@ -197,14 +200,14 @@ class Server(object):
             sys.exit(0)
 
 
-    def stop(self, use_zeroconf=False):
+    def stop(self):
         '''
             Server stops listening on the TCP socket, stops accepting new connections
             and finally kills spawned connection handlers
 
         '''
         log.debug('NetRNG server: stopping server and killing existing client connections')
-        if use_zeroconf:
+        if self.use_zeroconf:
             self.unregister_service()
         self.server.stop()
 
@@ -219,7 +222,7 @@ class Client(object):
         NetRNG client
     
     '''
-    def __init__(self, server_address=None, port=None):
+    def __init__(self, server_address=None, port=None, use_zeroconf=False):
         log.info('NetRNG client: initializing')
 
         # Address of the server to connect to
@@ -239,6 +242,8 @@ class Client(object):
 
         # client socket for connecting to server
         self.sock = None
+        
+        self.use_zeroconf = use_zeroconf
     
         self.zeroconf_controller = Zeroconf()
 
@@ -363,7 +368,7 @@ class Client(object):
         sys.exit(0)
 
 
-    def start(self, use_zeroconf=False):
+    def start(self):
         '''
             Client spawns a greenlet for the rngd handler and the network stream
             connection, then joins and waits for them to block the caller
