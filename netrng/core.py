@@ -104,11 +104,11 @@ class Server(object):
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
         log.info('NetRNG server: registering service with Bonjour: %s', info)
-        self.zeroconf_controller.registerService(info)
+        self.zeroconf_controller.register_service(info)
 
     def unregister_service(self):
         log.info('NetRNG server: unregistering all bonjour services')
-        self.zeroconf_controller.unregisterAllServices()
+        self.zeroconf_controller.unregister_all_services()
 
     def serve(self, sock, address):
         '''
