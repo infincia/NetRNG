@@ -101,6 +101,8 @@ class Server(object):
 
 
     def broadcast_service(self):
+        if self.listen_address == '0.0.0.0':
+            raise Exception('NetRNG server: zeroconf cannot use %s as a listen address, please set a listen address in /etc/netrng.conf' % self.listen_address)
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
         log.info('NetRNG server: registering service with Bonjour: %s', info)
@@ -224,15 +226,7 @@ class Client(object):
     '''
     def __init__(self, server_address=None, port=None, use_zeroconf=False):
         log.info('NetRNG client: initializing')
-
-        # Address of the server to connect to
-        self.server_address = server_address
-    
-        # TCP port to connect to on the server
-        self.port = port
-
-
-
+        
         # client socket for connecting to server
         self.rngd = gevent.subprocess.Popen(['rngd','-f','-r','/dev/stdin'],
                                                stdin=gevent.subprocess.PIPE,
@@ -246,9 +240,20 @@ class Client(object):
         self.use_zeroconf = use_zeroconf
     
         if self.use_zeroconf:
+            # Address of the server to connect to
+            self.server_address = None
+    
+            # TCP port to connect to on the server
+            self.port = None
+            
             self.zeroconf_controller = Zeroconf()
-            self.browser = ServiceBrowser(self.zeroconf, "_netrng._tcp.local.", self)
-
+            self.browser = ServiceBrowser(self.zeroconf_controller, "_netrng._tcp.local.", self)
+        else:
+            # Address of the server to connect to
+            self.server_address = server_address
+    
+            # TCP port to connect to on the server
+            self.port = port
 
         # queue for pushing received samples to the rngd subprocess as needed
         self.rngd_queue = gevent.queue.Queue(maxsize=10)
@@ -260,8 +265,8 @@ class Client(object):
 
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
-        self.server_address = info['address']
-        self.port = info['port']
+        self.server_address = socket.inet_ntoa(info.address)
+        self.port = info.port
         log.debug('Service %s added, service info: %s' % (name, info))
         
 
