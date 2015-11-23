@@ -21,7 +21,7 @@ def test_client():
     client.start()
 
 if __name__ == '__main__':
-    test_server()
-    test_client()
+    #test_server()
+    #test_client()
     sys.exit(0)
     
