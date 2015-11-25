@@ -13,15 +13,12 @@ def test_server():
                           sample_size_bytes=2048,
                           hwrng_device='/dev/zero',
                           use_zeroconf=True)
-
-    server.start()
     
 def test_client():
     client = netrng.core.Client(server_address='127.0.0.1', port=8989, use_zeroconf=True)
-    client.start()
 
 if __name__ == '__main__':
-    #test_server()
-    #test_client()
+    test_server()
+    test_client()
     sys.exit(0)
     
