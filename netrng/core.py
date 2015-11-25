@@ -37,7 +37,7 @@ from gevent import Timeout
 from zeroconf import ServiceBrowser, Zeroconf, ServiceInfo
 
 # delimiter for end of socket messages
-SOCKET_DELIMITER = '--NETRNG-SOCKET-DELIMITER'
+SOCKET_DELIMITER = b'--NETRNG-SOCKET-DELIMITER'
 
 # library logger
 log = logging.getLogger('netrng')
@@ -125,7 +125,7 @@ class Server(object):
         try:
             while True:
                 log.debug('NetRNG server: receive cycle start')
-                requestmsg = ""
+                requestmsg = b""
                 with Timeout(3, gevent.Timeout):
                     while True:
                         data = sock.recv(1024)
@@ -134,7 +134,7 @@ class Server(object):
                         if SOCKET_DELIMITER in requestmsg:
                             break
                         gevent.sleep()
-                requestmsg = requestmsg.replace(SOCKET_DELIMITER, '')
+                requestmsg = requestmsg.replace(SOCKET_DELIMITER, b'')
                 request = msgpack.unpackb(requestmsg)
                 log.debug('NetRNG server: receive cycle done')
                 log.debug('NetRNG server: request received %s', request)
@@ -337,7 +337,7 @@ class Client(object):
 
                 # wait for response
                 log.debug('NetRNG client: receive cycle start')
-                responsemsg = ""
+                responsemsg = b""
                 with Timeout(2, gevent.Timeout):
                     while True:
                         data = server_socket.recv(1024)
@@ -347,7 +347,7 @@ class Client(object):
                             break
                         gevent.sleep()
 
-                responsemsg = responsemsg.replace(SOCKET_DELIMITER, '')
+                responsemsg = responsemsg.replace(SOCKET_DELIMITER, b'')
                 response = msgpack.unpackb(responsemsg)
                 log.debug('NetRNG client: receive cycle done')
 
