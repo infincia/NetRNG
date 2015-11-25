@@ -9,12 +9,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-
-
-py = sys.version_info
-if py < (2,7) and py < (3,0):
-    raise NotImplementedError("NetRNG requires Python 2.7, Python 3.2+ support will be available when gevent supports Python 3")
-
 def read_file(name, *args):
     try:
         return codecs.open(join(dirname(__file__), name),  encoding='utf-8').read(*args)
@@ -41,12 +35,16 @@ setup(name='netrng',
     license='MIT',
     keywords='rng hwrng entropy random',
     platforms = 'any',
-    install_requires = ['gevent==1.0.2', 'msgpack-python==0.4.6', 'zeroconf==0.17.4'],
-    classifiers=['Development Status :: 3 - Alpha',
+    install_requires = ['gevent==1.1rc1', 'msgpack-python==0.4.6', 'zeroconf==0.17.4', 'six==1.10.0'],
+    classifiers=['Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: POSIX',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],

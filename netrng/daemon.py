@@ -22,7 +22,7 @@ import time
 import sys
 import os
 import logging
-import ConfigParser
+from six.moves import configparser
 
 # local modules
 import netrng.core
@@ -49,7 +49,7 @@ config_defaults.update(global_defaults)
 config_defaults.update(server_defaults)
 config_defaults.update(client_defaults)
 
-netrng_config = ConfigParser.ConfigParser(defaults=config_defaults)
+netrng_config = configparser.ConfigParser(defaults=config_defaults)
 netrng_config.read('/etc/netrng.conf')
 
 # logging level
