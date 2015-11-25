@@ -12,7 +12,7 @@ from __future__ import absolute_import, print_function, division
 
 __author__ = 'Stephen Oliver'
 __maintainer__ = 'Stephen Oliver <steve@infincia.com>'
-__version__ = '0.2a3'
+__version__ = '0.2b1'
 __license__ = 'MIT'
 __all__ = ['Server', 'Client']
 
