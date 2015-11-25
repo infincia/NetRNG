@@ -86,7 +86,7 @@ class Server(object):
         self.hwrng_device = hwrng_device
 
         # open the hwrng for reading later during client requests
-        self.hwrng = open(self.hwrng_device, 'r')
+        self.hwrng = open(self.hwrng_device, 'rb')
 
 
 
