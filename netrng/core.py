@@ -96,8 +96,9 @@ class Server(object):
         self.rng_lock = RLock()
         
         self.use_zeroconf = use_zeroconf
-
-        self.zeroconf_controller = Zeroconf()
+        
+        if self.use_zeroconf:
+            self.zeroconf_controller = Zeroconf()
 
 
     def broadcast_service(self):
