@@ -138,17 +138,17 @@ class Server(object):
                 request = msgpack.unpackb(requestmsg)
                 log.debug('NetRNG server: receive cycle done')
                 log.debug('NetRNG server: request received %s', request)
-                if request['get'] == 'sample':
+                if request[b'get'] == b'sample':
                     with self.rng_lock:
                         log.debug('NetRNG server: rng lock acquired')
                         sample = self.hwrng.read(self.sample_size_bytes)
                     log.debug('NetRNG server: rng lock released')
                     log.debug('NetRNG server: sending response')
-                    responsemsg = msgpack.packb({'push': 'sample', 'sample': sample})
+                    responsemsg = msgpack.packb({b'push': b'sample', b'sample': sample})
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
-                if request['get'] == 'heartbeat':
+                if request[b'get'] == b'heartbeat':
                     log.debug('NetRNG server: sending heartbeat response to %s', address)
-                    responsemsg = msgpack.packb({'push': 'heartbeat'})
+                    responsemsg = msgpack.packb({b'push': b'heartbeat'})
                     sock.sendall(responsemsg + SOCKET_DELIMITER)
         except socket.error as e:
             if isinstance(e.args, tuple):
@@ -324,13 +324,13 @@ class Client(object):
                 if self.rngd_queue.full():
                     # send a keepalive to the server
                     log.debug('NetRNG client: sending heartbeat message')
-                    requestmsg = msgpack.packb({'get': 'heartbeat'})
+                    requestmsg = msgpack.packb({b'get': b'heartbeat'})
                     server_socket.sendall(requestmsg + SOCKET_DELIMITER)
                     log.debug('NetRNG client: heartbeat request sent')
                 else:
                     # request a new sample
                     log.debug('NetRNG client: requesting sample')
-                    requestmsg = msgpack.packb({'get': 'sample'})
+                    requestmsg = msgpack.packb({b'get': b'sample'})
                     server_socket.sendall(requestmsg + SOCKET_DELIMITER)
                     log.debug('NetRNG client: sample request sent')
 
@@ -352,11 +352,11 @@ class Client(object):
                 log.debug('NetRNG client: receive cycle done')
 
 
-                if response['push'] == 'sample':
-                    sample = response['sample']
+                if response[b'push'] == b'sample':
+                    sample = response[b'sample']
                     log.debug('NetRNG client: received %d byte sample', len(sample))
                     self.rngd_queue.put(sample)
-                elif response['push'] == 'heartbeat':
+                elif response[b'push'] == b'heartbeat':
                     log.debug('NetRNG client: received heartbeat response')
                     gevent.sleep(1)
                 else:
