@@ -91,17 +91,15 @@ Common devices to use as the NetRNG server
 Setup
 -----
 
-There is very little actual configuration required for NetRNG, but until it is
-packaged and uploaded to PyPi you'll need to manually clone the repository and
-package it for installation.
+There is very little actual configuration required for NetRNG, it is packaged
+on PyPi as a universal wheel, and can be installed with ``pip``.
 
-Feel free to install the generated package wherever you like, but ``/opt/NetRNG``
-is the default where the bundled init/upstart script are pointed, so if you
-install the module somewhere else make sure to change them once they're copied
-to /etc/.
+Feel free to install it wherever you like, but ``/opt/NetRNG`` is where the 
+bundled init/upstart script point, so if you install somewhere else make sure to 
+change them after copying to the proper location in ``/etc/``.
 
-I don't advise installing the package in the main system python package directory,
-use a virtualenv to make things easier :)
+I don't advise installing the package in the global Python installation, but you
+can if you want to. If possible just use a virtualenv to make things easier :)
 
 Note: these instructions are written for Debian/Ubuntu and derivatives, you'll
 need to determine the equivalent native package names for build-essential and
@@ -111,14 +109,6 @@ The virtualenv activation is repeated on purpose in certain steps to ensure that
 someone who isn't following the steps sequentially won't accidentally install
 python modules in the global system (not being root helps here, but just in
 case...).
-
-Clone the repo
---------------
-
-.. code-block:: shell
-
-    cd ~/
-    git clone https://github.com/infincia/NetRNG.git
 
 Create virtualenv
 -----------------
@@ -132,32 +122,29 @@ Create a virtualenv for NetRNG:
 Setup build environment
 -----------------------
 
-Some NetRNG dependencies require building python C extensions, so we need to
-install a compiler and python development headers so they'll build properly
-during installation of the NetRNG package:
+Some NetRNG dependencies require building Python C extensions, a compiler and 
+Python development headers are needed so they'll build properly:
 
 .. code-block:: shell
 
     apt-get install build-essential
     apt-get install python-dev
 
-The `wheel` module is also needed to build NetRNG, so we install it in to the
-virtualenv:
+The `wheel` module is also needed to build NetRNG, so make sure it is installed
+in the virtualenv:
 
 .. code-block:: shell
 
     source /opt/NetRNG/bin/activate
     pip install wheel
 
-Build and install NetRNG
------------------------------
+Install NetRNG
+--------------
 
 .. code-block:: shell
 
-    cd ~/NetRNG
     source /opt/NetRNG/bin/activate
-    python setup.py bdist_wheel
-    pip install dist/netrng*.whl
+    pip install netrng
 
 
 Install rng-tools
@@ -172,26 +159,25 @@ On Ubuntu or Debian you can install it like this:
 
     sudo apt-get install rng-tools
     
-I have not tested NetRNG on FreeBSD, but rng-tools seems to support FreeBSD so
-it should work. You'll need to install rng-tools from the ports collection.
-    
 Configuration
 -------------
 
-Copy and rename the sample config file on all machines before use:
+Copy the sample config file:
 
 .. code-block:: shell
 
     cp /opt/NetRNG/conf/netrng.conf.sample /etc/netrng.conf
 
 The NetRNG server requires very little configuration on most systems, but the 
-client requires setting the right server address and setting the mode to 'client'. 
+client configuration requires setting the right server address.
 
-The rest of the configuration should be fine unless you have a very slow HWRNG and 
-need to tweak the data flow settings. The defaults send 2KB chunks of random data 
-to each connected client as fast as possible. You can tweak sample_size_bytes if 
-needed. This process may be automated in the future.
+Zeroconf
+--------
 
+Zeroconf is enabled by default in the configuration file, just make sure to set
+the  ``listen_address`` correctly on the server.
+
+The client will ignore the ``server_address`` setting when Zeroconf is enabled.
 
 Run for testing
 ---------------
