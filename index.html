@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>NetRNG by infincia</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>NetRNG</h1>
+        <h2>Networked entropy distribution system for Raspberry Pi and Beaglebone</h2>
+        <a href="https://github.com/infincia/NetRNG" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1></h1>
+
+<h1>
+<a id="netrng" class="anchor" href="#netrng" aria-hidden="true"><span class="octicon octicon-link"></span></a>NetRNG</h1>
+
+<p><a href="https://travis-ci.org/infincia/NetRNG"><img src="https://travis-ci.org/infincia/NetRNG.svg?branch=master" alt="Build Status"></a></p>
+
+<p><strong>Note: The master branch of this code is alpha quality but usable</strong>.</p>
+
+<p>NetRNG is effectively a network connected hardware random number generator. </p>
+
+<p>It allows devices like the RaspberryPi, Beaglebone, or any machine with a TPM, 
+Entropy Key, or other hardware random number generator onboard to act as a NetRNG 
+server, providing high quality random data to other machines on the network. </p>
+
+<p>Virtual machines can potentially benefit the most from NetRNG, as they typically 
+suffer from poor quality local entropy sources due to their running environment.</p>
+
+<p>No application or kernel changes are required on NetRNG Client machines; any
+application using <code>/dev/random</code> and <code>/dev/urandom</code> will automatically and 
+transparently receive entropy from the NetRNG server.</p>
+
+<h2>
+<a id="why-it-exists" class="anchor" href="#why-it-exists" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why it exists</h2>
+
+<p>EntropyBroker is the closest similar project I know of, but it didn't build when I
+tried to use it, and the code seems quite large and complicated for a task that,
+conceptually, is very simple.</p>
+
+<p>So I wrote NetRNG. It's simple code, easy to maintain, easy to deploy, and with 
+the exception of some network protocol issues before v0.1, it works quite 
+well.</p>
+
+<h2>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h2>
+
+<p>As a complete system, NetRNG links <code>/dev/hwrng</code> on one machine, to <code>/dev/random</code>
+on many others, carefully ensuring that each machine receives unique entropy samples,
+while allowing the entropy to be validated for quality and ensuring that entropy
+is fairly distributed among connected clients.</p>
+
+<p>It is essentially a persistent pipeline from one machine to many others, with
+some minor restrictions on how the pipeline functions to make it suitable for the 
+task.</p>
+
+<p>However, netrng.py itself does one job and only one job: it moves random data 
+around on the local network. Other tasks like validating the samples and providing
+them to the kernel entropy pool are left to <code>rngd</code> from rng-tools, which is
+automatically started and managed by NetRNG.</p>
+
+<h2>
+<a id="server" class="anchor" href="#server" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server</h2>
+
+<p>The NetRNG server reads from <code>/dev/hwrng</code> (configurable), dividing up the stream 
+in to non-repeating, non-overlapping samples of a size defined in the configuration
+file, then sends each one to clients on the local network.</p>
+
+<p>The maximum number of clients that will be accepted can be configured on the server,
+this allows you to prevent a slow HWRNG from being spread too thin among too many
+clients. </p>
+
+<p>I'm working on a QoS style load management system that will allow you to guarantee
+that each connected client can receive entropy samples at a specific rate, 10KB/s
+for example. Clients would be allowed to connect until the server could no longer
+guarantee that entropy rate to each of them.</p>
+
+<h2>
+<a id="client" class="anchor" href="#client" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client</h2>
+
+<p>The client starts <code>rngd</code> from rng-tools as a subprocess, then connects to the 
+server and starts requesting entropy samples from it. Then each sample is forwarded
+to <code>rngd</code> for processing.</p>
+
+<p>Then, <code>rngd</code> validates the quality of the entropy sample before submitting it to 
+the Linux or FreeBSD kernel for other programs to use via <code>/dev/random</code>.</p>
+
+<h2>
+<a id="common-devices-to-use-as-the-netrng-server" class="anchor" href="#common-devices-to-use-as-the-netrng-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>Common devices to use as the NetRNG server</h2>
+
+<ul>
+<li>RaspberryPi</li>
+<li>Beaglebone</li>
+<li>PC Engines ALIX</li>
+<li>Various server mainboards</li>
+<li>Any machine with a TPM chip onboard</li>
+<li>Any machine with an Entropy Key</li>
+</ul>
+
+<h2>
+<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>There is very little actual configuration required for NetRNG, but until it is
+packaged and uploaded to PyPi you'll need to manually clone the repository and
+package it for installation.</p>
+
+<p>Feel free to install the generated package wherever you like, but <code>/opt/NetRNG</code>
+is the default where the bundled init/upstart script are pointed, so if you
+install the module somewhere else make sure to change them once they're copied
+to /etc/.</p>
+
+<p>I don't advise installing the package in the main system python package directory,
+use a virtualenv to make things easier :)</p>
+
+<p>Note: these instructions are written for Debian/Ubuntu and derivatives, you'll
+need to determine the equivalent native package names for build-essential and
+python-dev.</p>
+
+<p>The virtualenv activation is repeated on purpose in certain steps to ensure that
+someone who isn't following the steps sequentially won't accidentally install
+python modules in the global system (not being root helps here, but just in
+case...).</p>
+
+<h2>
+<a id="clone-the-repo" class="anchor" href="#clone-the-repo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Clone the repo</h2>
+
+<pre><code>cd ~/
+git clone https://github.com/infincia/NetRNG.git
+</code></pre>
+
+<h2>
+<a id="create-virtualenv" class="anchor" href="#create-virtualenv" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create virtualenv</h2>
+
+<p>Create a virtualenv for NetRNG:</p>
+
+<pre><code>virtualenv /opt/NetRNG
+</code></pre>
+
+<h2>
+<a id="setup-build-environment" class="anchor" href="#setup-build-environment" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup build environment</h2>
+
+<p>Some NetRNG dependencies require building python C extensions, so we need to
+install a compiler and python development headers so they'll build properly
+during installation of the NetRNG package:</p>
+
+<pre><code>apt-get install build-essential
+apt-get install python-dev
+</code></pre>
+
+<p>The <code>wheel</code> module is also needed to build NetRNG, so we install it in to the
+virtualenv:</p>
+
+<pre><code>source /opt/NetRNG/bin/activate
+pip install wheel
+</code></pre>
+
+<h2>
+<a id="build-and-install-netrng" class="anchor" href="#build-and-install-netrng" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build and install NetRNG</h2>
+
+<pre><code>cd ~/NetRNG
+source /opt/NetRNG/bin/activate
+python setup.py bdist_wheel
+pip install dist/netrng*.whl
+</code></pre>
+
+<h2>
+<a id="install-rng-tools" class="anchor" href="#install-rng-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install rng-tools</h2>
+
+<p>On some Linux distributions, rng-tools is installed by default. For others you
+will need to install it yourself.</p>
+
+<p>On Ubuntu or Debian you can install it like this:</p>
+
+<pre><code>sudo apt-get install rng-tools
+</code></pre>
+
+<p>I have not tested NetRNG on FreeBSD, but rng-tools seems to support FreeBSD so
+it should work. You'll need to install rng-tools from the ports collection.</p>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>Copy and rename the sample config file on all machines before use:</p>
+
+<pre><code>cp /opt/NetRNG/conf/netrng.conf.sample /etc/netrng.conf
+</code></pre>
+
+<p>The NetRNG server requires very little configuration on most systems, but the 
+client requires setting the right server address and setting the mode to 'client'. </p>
+
+<p>The rest of the configuration should be fine unless you have a very slow HWRNG and 
+need to tweak the data flow settings. The defaults send 2KB chunks of random data 
+to each connected client as fast as possible. You can tweak sample_size_bytes if 
+needed. This process may be automated in the future.</p>
+
+<h2>
+<a id="run-for-testing" class="anchor" href="#run-for-testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run for testing</h2>
+
+<p>Since the compiled daemon script is available on your path while the virtualenv
+is activated, you can run it directly after the config file is determined to be
+correct:</p>
+
+<pre><code>source /opt/NetRNG/bin/activate
+netrngd
+</code></pre>
+
+<h2>
+<a id="long-term-use" class="anchor" href="#long-term-use" aria-hidden="true"><span class="octicon octicon-link"></span></a>Long term use</h2>
+
+<p>I have written both Upstart and systemd scripts for netrngd.</p>
+
+<p>If someone would like to contribute other types of init scripts I will gladly 
+accept a pull request.</p>
+
+<p>To use the the systemd script:</p>
+
+<pre><code>cp /opt/NetRNG/conf/netrng.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl start netrng
+</code></pre>
+
+<p>To use the Upstart script:</p>
+
+<pre><code>cp /opt/NetRNG/conf/netrng.conf.upstart /etc/init/netrng.conf
+service netrng start
+</code></pre>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/infincia/NetRNG/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/infincia/NetRNG/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/infincia/NetRNG"></a> is maintained by <a href="https://github.com/infincia">infincia</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
