@@ -103,7 +103,7 @@ class Server(object):
 
     def broadcast_service(self):
         if self.listen_address == '0.0.0.0':
-            raise Exception('NetRNG server: zeroconf cannot use %s as a listen address, please set a listen address in /etc/netrng.conf' % self.listen_address)
+            raise Exception('NetRNG server: zeroconf currently requires a specific listen address in /etc/netrng.conf')
         desc = {'version': __version__}
         info = ServiceInfo('_netrng._tcp.local.', '{}._netrng._tcp.local.'.format(socket.gethostname()), socket.inet_aton(self.listen_address), self.port, 0, 0, desc)
         log.info('NetRNG server: registering service with Bonjour: %s', info)
