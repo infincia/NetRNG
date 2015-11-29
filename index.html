@@ -73,7 +73,7 @@ is fairly distributed among connected clients.</p>
 some minor restrictions on how the pipeline functions to make it suitable for the 
 task.</p>
 
-<p>However, netrng.py itself does one job and only one job: it moves random data 
+<p>However, NetRNG itself does one job and only one job: it moves random data 
 around on the local network. Other tasks like validating the samples and providing
 them to the kernel entropy pool are left to <code>rngd</code> from rng-tools, which is
 automatically started and managed by NetRNG.</p>
@@ -119,17 +119,15 @@ the Linux or FreeBSD kernel for other programs to use via <code>/dev/random</cod
 <h2>
 <a id="setup" class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
 
-<p>There is very little actual configuration required for NetRNG, but until it is
-packaged and uploaded to PyPi you'll need to manually clone the repository and
-package it for installation.</p>
+<p>There is very little actual configuration required for NetRNG, it is packaged
+on PyPi as a universal wheel, and can be installed with <code>pip</code>.</p>
 
-<p>Feel free to install the generated package wherever you like, but <code>/opt/NetRNG</code>
-is the default where the bundled init/upstart script are pointed, so if you
-install the module somewhere else make sure to change them once they're copied
-to /etc/.</p>
+<p>Feel free to install it wherever you like, but <code>/opt/NetRNG</code> is where the 
+bundled init/upstart script point, so if you install somewhere else make sure to 
+change them after copying to the proper location in <code>/etc/</code>.</p>
 
-<p>I don't advise installing the package in the main system python package directory,
-use a virtualenv to make things easier :)</p>
+<p>I don't advise installing the package in the global Python installation, but you
+can if you want to. If possible just use a virtualenv to make things easier :)</p>
 
 <p>Note: these instructions are written for Debian/Ubuntu and derivatives, you'll
 need to determine the equivalent native package names for build-essential and
@@ -139,13 +137,6 @@ python-dev.</p>
 someone who isn't following the steps sequentially won't accidentally install
 python modules in the global system (not being root helps here, but just in
 case...).</p>
-
-<h2>
-<a id="clone-the-repo" class="anchor" href="#clone-the-repo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Clone the repo</h2>
-
-<pre><code>cd ~/
-git clone https://github.com/infincia/NetRNG.git
-</code></pre>
 
 <h2>
 <a id="create-virtualenv" class="anchor" href="#create-virtualenv" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create virtualenv</h2>
@@ -158,28 +149,25 @@ git clone https://github.com/infincia/NetRNG.git
 <h2>
 <a id="setup-build-environment" class="anchor" href="#setup-build-environment" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup build environment</h2>
 
-<p>Some NetRNG dependencies require building python C extensions, so we need to
-install a compiler and python development headers so they'll build properly
-during installation of the NetRNG package:</p>
+<p>Some NetRNG dependencies require building Python C extensions, a compiler and 
+Python development headers are needed so they'll build properly:</p>
 
 <pre><code>apt-get install build-essential
 apt-get install python-dev
 </code></pre>
 
-<p>The <code>wheel</code> module is also needed to build NetRNG, so we install it in to the
-virtualenv:</p>
+<p>The <code>wheel</code> module is also needed to build NetRNG, so make sure it is installed
+in the virtualenv:</p>
 
 <pre><code>source /opt/NetRNG/bin/activate
 pip install wheel
 </code></pre>
 
 <h2>
-<a id="build-and-install-netrng" class="anchor" href="#build-and-install-netrng" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build and install NetRNG</h2>
+<a id="install-netrng" class="anchor" href="#install-netrng" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install NetRNG</h2>
 
-<pre><code>cd ~/NetRNG
-source /opt/NetRNG/bin/activate
-python setup.py bdist_wheel
-pip install dist/netrng*.whl
+<pre><code>source /opt/NetRNG/bin/activate
+pip install netrng
 </code></pre>
 
 <h2>
@@ -193,24 +181,26 @@ will need to install it yourself.</p>
 <pre><code>sudo apt-get install rng-tools
 </code></pre>
 
-<p>I have not tested NetRNG on FreeBSD, but rng-tools seems to support FreeBSD so
-it should work. You'll need to install rng-tools from the ports collection.</p>
-
 <h2>
 <a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
 
-<p>Copy and rename the sample config file on all machines before use:</p>
+<p>Copy the sample config file:</p>
 
 <pre><code>cp /opt/NetRNG/conf/netrng.conf.sample /etc/netrng.conf
 </code></pre>
 
-<p>The NetRNG server requires very little configuration on most systems, but the 
-client requires setting the right server address and setting the mode to 'client'. </p>
+<p>NetRNG requires very little configuration on most systems. </p>
 
-<p>The rest of the configuration should be fine unless you have a very slow HWRNG and 
-need to tweak the data flow settings. The defaults send 2KB chunks of random data 
-to each connected client as fast as possible. You can tweak sample_size_bytes if 
-needed. This process may be automated in the future.</p>
+<p>The <code>listen_address</code> must be set correctly on the Server, and <code>server_address</code>
+must be set correctly on the client if Zeroconf is disabled.</p>
+
+<h2>
+<a id="zeroconf" class="anchor" href="#zeroconf" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zeroconf</h2>
+
+<p>Zeroconf is enabled by default in the configuration file, just make sure to set
+the  <code>listen_address</code> correctly on the server.</p>
+
+<p>The client will ignore the <code>server_address</code> setting when Zeroconf is enabled.</p>
 
 <h2>
 <a id="run-for-testing" class="anchor" href="#run-for-testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run for testing</h2>
