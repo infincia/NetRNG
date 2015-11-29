@@ -33,7 +33,7 @@ import netrng.core
 '''
 config_defaults = dict()
 
-global_defaults = {'mode': 'server',
+global_defaults = {'mode': 'client',
                    'port': 8989,
                    'debug': 'no',
                    'zeroconf': 'no'}

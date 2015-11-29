@@ -1,5 +1,5 @@
 [Global]
-mode = server
+mode = client
 port = 8989
 debug = no
 zeroconf = no
