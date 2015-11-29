@@ -168,8 +168,10 @@ Copy the sample config file:
 
     cp /opt/NetRNG/conf/netrng.conf.sample /etc/netrng.conf
 
-The NetRNG server requires very little configuration on most systems, but the 
-client configuration requires setting the right server address.
+NetRNG requires very little configuration on most systems. 
+
+The ``listen_address`` must be set correctly on the Server, and ``server_address``
+must be set correctly on the client if Zeroconf is disabled.
 
 Zeroconf
 --------
