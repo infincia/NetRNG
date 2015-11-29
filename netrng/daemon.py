@@ -39,7 +39,7 @@ global_defaults = {'mode': 'client',
                    'zeroconf': 'no'}
 
 server_defaults = {'sample_size_bytes': 2048,
-                   'listen_address': '0.0.0.0',
+                   'listen_address': '192.168.1.2',
                    'hwrng_device': '/dev/hwrng',
                    'max_clients': 2}
 
