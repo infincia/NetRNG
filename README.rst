@@ -43,7 +43,7 @@ It is essentially a persistent pipeline from one machine to many others, with
 some minor restrictions on how the pipeline functions to make it suitable for the 
 task.
 
-However, netrng.py itself does one job and only one job: it moves random data 
+However, NetRNG itself does one job and only one job: it moves random data 
 around on the local network. Other tasks like validating the samples and providing
 them to the kernel entropy pool are left to ``rngd`` from rng-tools, which is
 automatically started and managed by NetRNG.
